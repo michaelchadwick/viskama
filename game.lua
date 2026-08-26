@@ -18,7 +18,7 @@ function Game.new(board, smallFont)
   self.board = board
   self.state = "title"
 
-  self.font = smallFont   -- font used for the HUD
+  self.font = smallFont -- font used for the HUD
 
   self.throwsLeft = 3
   self.scores = {}
@@ -144,7 +144,7 @@ function Game:throwDart(vec)
   local magnitude = math.sqrt(vec.x * vec.x + vec.y * vec.y)
   local dir = {}
   if magnitude < 0.01 then
-    dir.x, dir.y = 0, -1     -- default forward if the player taps
+    dir.x, dir.y = 0, -1 -- default forward if the player taps
   else
     dir.x = vec.x / magnitude
     dir.y = vec.y / magnitude
@@ -172,8 +172,9 @@ function Game:throwDart(vec)
   self.totalScore = self.totalScore + score
   self.throwsLeft = self.throwsLeft - 1
 
+  -- after a dart is thrown
   if self.throwsLeft <= 0 then
-    self.state = "score"
+    self.state = "over"
   end
 end
 
@@ -188,7 +189,7 @@ end
 -- DRAW – board, darts and in‑game UI
 ----------------------------------------------------------------
 function Game:draw()
-  love.graphics.clear(0.05, 0.05, 0.05)   -- dark background
+  love.graphics.clear(0.05, 0.05, 0.05) -- dark background
 
   self.board:draw()
   for _, dart in ipairs(self.darts) do

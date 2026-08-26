@@ -31,26 +31,26 @@ function love.update(dt)
   game:update(dt)
 end
 
+-- draw ------------------------------------------------------------
 function love.draw()
   if game.state == "title" then
     ui:drawTitle()
-  elseif game.state == "play" then
-    game:draw()
-  elseif game.state == "score" then
-    ui:drawScore(game.totalScore)
+  else
+    game:draw()                      -- always show the board & darts
+    if game.state == "over" then     -- overlay only when finished
+      ui:drawOverlay(game.totalScore)
+    end
   end
 end
 
------------------------------------------------------------------------
--- Key handling – start/quit
------------------------------------------------------------------------
+-- keypressed -------------------------------------------------------
 function love.keypressed(key, scancode, isrepeat)
   if key == "escape" then
     love.event.quit()
   elseif game.state == "title" then
     game:reset()
-  elseif game.state == "score" then
-    game.state = "title"     -- back to title
+  elseif game.state == "over" then
+    game:reset()     -- restart the round (stay in play)
   end
 end
 
