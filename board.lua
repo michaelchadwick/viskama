@@ -5,7 +5,7 @@ local Board = {}
 Board.__index = Board
 
 -- -------------------------------------------------------
---  Board.new – add derived radii for a realistic board
+--  Board.new – set the bullseye radii to a much smaller size
 -- -------------------------------------------------------
 function Board.new(x, y, radius)
   local self                 = setmetatable({}, Board)
@@ -14,35 +14,43 @@ function Board.new(x, y, radius)
   self.y                     = y or 300
   self.radius                = radius or 200
 
-  -- existing scoring radii
-  self.innerBull             = 30
-  self.outerBull             = 60
-  self.ring                  = 90
-  self.outerRing             = 200
+  -- ----------------------------------------
+  --  Bullseye radii (much smaller now)
+  -- ----------------------------------------
+  self.innerBull             = self.radius * 0.04 -- ~8 px for a 200‑px board
+  self.outerBull             = self.radius * 0.09 -- ~18 px
 
-  -- **RE‑ADD maxError for throw‑accuracy calculation**
-  self.maxError              = 12
-
-  -- ------------------------------------------------------------------
-  --  Derived radii for drawing a realistic board
-  --  These are *not* used for scoring – they only affect the look.
-  -- ------------------------------------------------------------------
-  self.doubleRingWidth       = self.radius * 0.10  -- 10 % of radius
+  -- ----------------------------------------
+  --  Derived radii for the rings
+  -- ----------------------------------------
+  self.doubleRingWidth       = self.radius * 0.10
   self.doubleRingInnerRadius = self.radius - self.doubleRingWidth
 
-  self.tripleRingWidth       = self.radius * 0.05  -- 5 % of radius
+  self.tripleRingWidth       = self.radius * 0.05
   self.tripleRingOuterRadius = self.doubleRingInnerRadius - self.tripleRingWidth
   self.tripleRingInnerRadius = self.tripleRingOuterRadius - self.tripleRingWidth
 
-  -- number font (cached so we don’t recreate each frame)
+  -- ----------------------------------------
+  --  Score‑related radii (used by calculateScore)
+  -- ----------------------------------------
+  self.ring                  = self.tripleRingInnerRadius -- inner single area
+  self.outerRing             = self.radius       -- outer single area (double ring)
+
+  -- ----------------------------------------
+  --  Misc. (used for error jitter)
+  -- ----------------------------------------
+  self.maxError              = 12 -- maximum random offset (pixels)
+
+  -- number font
   self.numberFont            = love.graphics.newFont(14)
 
   return self
 end
 
 -- -------------------------------------------------------
---  Board:draw – realistic board with alternating colors,
---  triple & double rings, and numbered segments
+--  Board:draw – realistic dartboard with alternating
+--  red/green colors for the triple and double rings,
+--  light‑grey numbers, and a small green‑red bullseye
 -- -------------------------------------------------------
 function Board:draw()
   love.graphics.push()
@@ -50,13 +58,13 @@ function Board:draw()
 
   local segmentCount = 20
   local segmentAngle = math.rad(18)  -- 360° / 20
-  local baseAngle    = math.rad(-90) -- 20 is at the top
+  local baseAngle    = math.rad(-97) -- 20 is at the top (97 instead of 90 to better align numbers)
 
-  -- colors
+  -- base colors
   local colorA       = { 0.1, 0.1, 0.1 } -- dark gray
   local colorB       = { 0.8, 0.6, 0.2 } -- orange‑ish
-  local colorTriple  = { 0.9, 0.5, 0.1 } -- orange for the triple ring
-  local colorDouble  = { 0, 0, 0 }       -- black for the double ring
+  local colorRed     = { 0.7, 0, 0 }
+  local colorGreen   = { 0, 0.7, 0 }
 
   -- helper: draw a ring sector (filled polygon)
   local function drawRingSector(startAngle, endAngle, innerR, outerR, color)
@@ -75,79 +83,92 @@ function Board:draw()
       table.insert(points, x); table.insert(points, y)
     end
     love.graphics.setColor(color)
-    -- **CHANGED LINE** – use `unpack` instead of `table.unpack`
     love.graphics.polygon("fill", unpack(points))
   end
 
-
   -------------------------------------------------------
-  -- 1. main single area (inner + outer single) – alternating colors
+  -- 1. inner single area  (outer bull → triple‑inner)
   -------------------------------------------------------
   for i = 1, segmentCount do
     local startAngle = baseAngle + (i - 1) * segmentAngle
     local endAngle   = startAngle + segmentAngle
     local color      = (i % 2 == 1) and colorA or colorB
     drawRingSector(startAngle, endAngle,
-      self.outerBull, -- inner radius (outer bull)
-      self.radius,    -- outer radius (board edge)
+      self.outerBull,             -- inner radius
+      self.tripleRingInnerRadius, -- outer radius
       color)
   end
 
   -------------------------------------------------------
-  -- 2. triple ring – thin orange strip
+  -- 2. outer single area  (triple‑outer → double‑inner)
   -------------------------------------------------------
   for i = 1, segmentCount do
     local startAngle = baseAngle + (i - 1) * segmentAngle
     local endAngle   = startAngle + segmentAngle
+    local color      = (i % 2 == 1) and colorA or colorB
+    drawRingSector(startAngle, endAngle,
+      self.tripleRingOuterRadius, -- inner radius
+      self.doubleRingInnerRadius, -- outer radius
+      color)
+  end
+
+  -------------------------------------------------------
+  -- 3. triple ring – alternating red/green
+  -------------------------------------------------------
+  for i = 1, segmentCount do
+    local startAngle = baseAngle + (i - 1) * segmentAngle
+    local endAngle   = startAngle + segmentAngle
+    local ringColor  = (i % 2 == 1) and colorRed or colorGreen
     drawRingSector(startAngle, endAngle,
       self.tripleRingInnerRadius,
       self.tripleRingOuterRadius,
-      colorTriple)
+      ringColor)
   end
 
   -------------------------------------------------------
-  -- 3. double ring – thick black strip
+  -- 4. double ring – alternating red/green
   -------------------------------------------------------
   for i = 1, segmentCount do
     local startAngle = baseAngle + (i - 1) * segmentAngle
     local endAngle   = startAngle + segmentAngle
+    local ringColor  = (i % 2 == 1) and colorRed or colorGreen
     drawRingSector(startAngle, endAngle,
       self.doubleRingInnerRadius,
       self.radius,
-      colorDouble)
+      ringColor)
   end
 
   -------------------------------------------------------
-  -- 4. segment numbers (white)
+  -- 5. outer rim (white)
+  -------------------------------------------------------
+  love.graphics.setColor(1, 1, 1)
+  love.graphics.setLineWidth(3)
+  love.graphics.circle("line", 0, 0, self.radius + 3)
+
+  -------------------------------------------------------
+  -- 6. bullseye – small green outer bull, tiny red inner bull
+  -------------------------------------------------------
+  love.graphics.setColor(0, 1, 0) -- green outer bull
+  love.graphics.circle("fill", 0, 0, self.outerBull)
+  love.graphics.setColor(1, 0, 0) -- red inner bull
+  love.graphics.circle("fill", 0, 0, self.innerBull)
+
+  -------------------------------------------------------
+  -- 7. numbers – light grey, positioned just outside the rim
   -------------------------------------------------------
   local numbers = { 20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5 }
-  love.graphics.setFont(self.numberFont)
+  love.graphics.setColor(0.95, 0.95, 0.95) -- light grey
   for i = 1, segmentCount do
-    local angle = baseAngle + (i - 1) * segmentAngle + segmentAngle / 2
-    local radiusNumber = self.radius - 10 -- a bit inside the outer ring
-    local nx = radiusNumber * math.cos(angle)
-    local ny = radiusNumber * math.sin(angle)
+    local angle = (baseAngle + (i - 1) * segmentAngle + segmentAngle / 2)
+    local numberRadius = self.radius + 10
+    local nudgeAmount = 6 -- to better align numbers
+    local nx = numberRadius * math.cos(angle) - nudgeAmount
+    local ny = numberRadius * math.sin(angle) - nudgeAmount / 2
     local numStr = tostring(numbers[i])
     local w = self.numberFont:getWidth(numStr)
     local h = self.numberFont:getHeight()
-    love.graphics.setColor(1, 1, 1)
     love.graphics.print(numStr, nx - w / 2, ny - h / 2)
   end
-
-  -------------------------------------------------------
-  -- 5. bullseyes (red inner, green outer)
-  -------------------------------------------------------
-  love.graphics.setColor(1, 0, 0) -- inner bull
-  love.graphics.circle("fill", 0, 0, self.innerBull)
-  love.graphics.setColor(0, 1, 0) -- outer bull
-  love.graphics.circle("fill", 0, 0, self.outerBull)
-
-  -------------------------------------------------------
-  -- 6. outer board outline
-  -------------------------------------------------------
-  love.graphics.setColor(0, 0, 0)
-  love.graphics.setLineWidth(2)
-  love.graphics.circle("line", 0, 0, self.radius)
 
   love.graphics.pop()
 end
