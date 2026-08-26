@@ -189,22 +189,58 @@ end
 -- DRAW – board, darts and in‑game UI
 ----------------------------------------------------------------
 function Game:draw()
-  love.graphics.clear(0.05, 0.05, 0.05) -- dark background
+  love.graphics.clear(0.05, 0.05, 0.05)
 
+  -- 1. Board & darts
   self.board:draw()
   for _, dart in ipairs(self.darts) do
     dart:draw()
   end
 
+  -- 2. Pointer dot
+  if self.currentThrow.holding then
+    -- dragging: green dot at last drag position
+    love.graphics.setColor(0, 1, 0)
+    love.graphics.circle("fill", self.currentThrow.lastPos.x, self.currentThrow.lastPos.y, 4)
+  else
+    -- idle: blue dot at mouse position
+    local mx, my = love.mouse.getPosition()
+    love.graphics.setColor(0, 0, 1)
+    love.graphics.circle("fill", mx, my, 4)
+  end
+
+  -- 3. Visual force meter (only while dragging)
+  if self.currentThrow.holding then
+    local dx           = self.currentThrow.lastPos.x - self.currentThrow.startPos.x
+    local dy           = self.currentThrow.lastPos.y - self.currentThrow.startPos.y
+    local forceMag     = math.sqrt(dx * dx + dy * dy)
+    local forcePercent = math.min(forceMag / MAX_FORCE_MAG, 1)
+
+    local meterW       = 300
+    local meterH       = 20
+    local meterX       = (love.graphics.getWidth() - meterW) / 2
+    local meterY       = love.graphics.getHeight() - 50
+
+    -- background
+    love.graphics.setColor(0.3, 0.3, 0.3, 0.8)
+    love.graphics.rectangle("fill", meterX, meterY, meterW, meterH)
+
+    -- fill
+    love.graphics.setColor(0, 1, 0, 0.8)
+    love.graphics.rectangle("fill", meterX, meterY, meterW * forcePercent, meterH)
+
+    -- text
+    love.graphics.setColor(1, 1, 1)
+    local txt = string.format("Force: %.0f%%", forcePercent * 100)
+    local txtW = self.font:getWidth(txt)
+    love.graphics.print(txt, meterX + (meterW - txtW) / 2, meterY - 20)
+  end
+
+  -- 4. HUD
   love.graphics.setFont(self.font)
   love.graphics.setColor(1, 1, 1)
   love.graphics.print("Throw " .. (4 - self.throwsLeft) .. " of 3", 10, 10)
   love.graphics.print("Total Score: " .. self.totalScore, 10, 40)
-
-  if self.currentThrow.holding then
-    love.graphics.setColor(0, 1, 0)
-    love.graphics.circle("fill", self.currentThrow.lastPos.x, self.currentThrow.lastPos.y, 4)
-  end
 end
 
 return Game
