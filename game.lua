@@ -140,11 +140,15 @@ end
 --  Game:throwDart ------------------------------------------------
 ----------------------------------------------------------------
 function Game:throwDart(vec)
+  if self.throwsLeft <= 0 then
+    return -- no more darts allowed
+  end
+
   local magnitude = math.sqrt(vec.x * vec.x + vec.y * vec.y)
   local forceRatio = magnitude / MAX_FORCE_MAG
 
   local startPos = self.currentThrow.startPos
-  local floorThreshold = 0.1   -- 10 % of the max force is required to reach the board
+  local floorThreshold = 0.1 -- 10 % of the max force is required to reach the board
 
   local targetPos
   local angle
@@ -152,14 +156,14 @@ function Game:throwDart(vec)
   if forceRatio < floorThreshold then
     -- **No enough force → dart falls below the screen (floor)**
     targetPos = { x = startPos.x, y = love.graphics.getHeight() + 50 }
-    angle = math.rad(90)     -- point downwards
+    angle = math.rad(90) -- point downwards
   else
     -- **Normal throw**
 
     -- Direction of the flight (opposite of the drag vector)
     local dir = {}
     if magnitude < 0.01 then
-      dir.x, dir.y = 0, -1       -- default forward
+      dir.x, dir.y = 0, -1 -- default forward
     else
       dir.x = vec.x / magnitude
       dir.y = vec.y / magnitude
@@ -274,9 +278,10 @@ function Game:draw()
   end
 
   -- 4. HUD
+  local currentThrowNumber = math.min(3, 4 - self.throwsLeft)
   love.graphics.setFont(self.font)
   love.graphics.setColor(1, 1, 1)
-  love.graphics.print("Throw " .. (4 - self.throwsLeft) .. " of 3", 10, 10)
+  love.graphics.print("Throw " .. currentThrowNumber .. " of 3", 10, 10)
   love.graphics.print("Total Score: " .. self.totalScore, 10, 40)
 end
 
