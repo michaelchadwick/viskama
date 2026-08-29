@@ -137,42 +137,34 @@ function Game:joystickreleased(joy, button)
 end
 
 ----------------------------------------------------------------
---  Game:throwDart ------------------------------------------------
+--  Game:throwDart ---------------------------------------------
 ----------------------------------------------------------------
 function Game:throwDart(vec)
   if self.throwsLeft <= 0 then
-    return -- no more darts allowed
+    return
   end
 
   local magnitude = math.sqrt(vec.x * vec.x + vec.y * vec.y)
   local forceRatio = magnitude / MAX_FORCE_MAG
-
   local startPos = self.currentThrow.startPos
-  local floorThreshold = 0.1 -- 10 % of the max force is required to reach the board
 
+  local floorThreshold = 0.1
   local targetPos
   local angle
 
   if forceRatio < floorThreshold then
-    -- **No enough force → dart falls below the screen (floor)**
     targetPos = { x = startPos.x, y = love.graphics.getHeight() + 50 }
-    angle = math.rad(90) -- point downwards
+    angle = math.rad(90)
   else
-    -- **Normal throw**
-
-    -- Direction of the flight (opposite of the drag vector)
     local dir = {}
     if magnitude < 0.01 then
-      dir.x, dir.y = 0, -1 -- default forward
+      dir.x, dir.y = 0, -1
     else
       dir.x = vec.x / magnitude
       dir.y = vec.y / magnitude
     end
 
-    -- Distance the dart travels, capped at the board radius
     local travelDistance = math.min(forceRatio, 1) * self.board.radius
-
-    -- Error scaling: moderate at low force, minimal near 90 %, then grows again
     local optimumForce = 0.9
     local errorScale
     if forceRatio <= optimumForce then
@@ -192,9 +184,8 @@ function Game:throwDart(vec)
     angle = math.atan2(-dir.y, -dir.x)
   end
 
-  -- Create the animated dart and compute its score
   local score = self.board:calculateScore(targetPos)
-  local dart  = Dart.new(startPos, targetPos, score, angle)
+  local dart  = Dart.new(startPos, targetPos, score, angle, self.board.radius)
   table.insert(self.darts, dart)
 
   table.insert(self.scores, score)
