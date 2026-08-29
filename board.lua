@@ -10,7 +10,7 @@ local function drawOutlinedText(txt, x, y, font, color)
 
   -- draw the outline in white
   love.graphics.setColor(1, 1, 1)
-  local offsets = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } }
+  local offsets = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
   for _, off in ipairs(offsets) do
     love.graphics.print(txt, x + off[1], y + off[2])
   end
@@ -161,13 +161,13 @@ function Board:draw()
   -------------------------------------------------------
   for i = 1, segmentCount do
     local angle = baseAngle + (i - 1) * segmentAngle + segmentAngle / 2
-    local numberRadius = self.radius + 10
+    local numberRadius = self.radius + 16
     local nx = numberRadius * math.cos(angle)
     local ny = numberRadius * math.sin(angle)
     local numStr = tostring(self.numbers[i])
     local w = self.numberFont:getWidth(numStr)
     local h = self.numberFont:getHeight()
-    drawOutlinedText(numStr, nx - w / 2, ny - h / 2, self.numberFont, colors.numbers)
+    drawOutlinedText(numStr, nx - w / 2, ny - h / 2, love.graphics.newFont(16), colors.numbers)
   end
 
   love.graphics.pop()
