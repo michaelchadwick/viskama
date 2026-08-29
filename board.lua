@@ -63,11 +63,12 @@ function Board:draw()
   love.graphics.push()
   love.graphics.translate(self.x, self.y)
 
-  local segmentCount = 20
-  local segmentAngle = math.rad(18)  -- 360° / 20
-  local baseAngle    = math.rad(-90) -- 20 is at the top
+  local segmentCount     = 20
+  local segmentAngle     = math.rad(18)  -- 360° / 20
+  local baseAngle        = math.rad(-90) -- 20 is at the top
+  local halfSegmentAngle = math.rad(9)   -- 360° / 40  (half of 18°)
 
-  local colors       = self.colors
+  local colors           = self.colors
 
   -- helper: draw a ring sector (filled polygon)
   local function drawRingSector(startAngle, endAngle, innerR, outerR, color)
@@ -93,12 +94,12 @@ function Board:draw()
   -- 1. inner single area  (outer bull → triple‑inner)
   -------------------------------------------------------
   for i = 1, segmentCount do
-    local startAngle = baseAngle + (i - 1) * segmentAngle
+    local startAngle = baseAngle + (i - 1) * segmentAngle + halfSegmentAngle
     local endAngle   = startAngle + segmentAngle
     local color      = (i % 2 == 1) and colors.innerSingle or colors.outerSingle
     drawRingSector(startAngle, endAngle,
-      self.outerBull,             -- inner radius
-      self.tripleRingInnerRadius, -- outer radius
+      self.outerBull,
+      self.tripleRingInnerRadius,
       color)
   end
 
@@ -106,12 +107,12 @@ function Board:draw()
   -- 2. outer single area  (triple‑outer → double‑inner)
   -------------------------------------------------------
   for i = 1, segmentCount do
-    local startAngle = baseAngle + (i - 1) * segmentAngle
+    local startAngle = baseAngle + (i - 1) * segmentAngle + halfSegmentAngle
     local endAngle   = startAngle + segmentAngle
     local color      = (i % 2 == 1) and colors.innerSingle or colors.outerSingle
     drawRingSector(startAngle, endAngle,
-      self.tripleRingOuterRadius, -- inner radius
-      self.doubleRingInnerRadius, -- outer radius
+      self.tripleRingOuterRadius,
+      self.doubleRingInnerRadius,
       color)
   end
 
@@ -119,7 +120,7 @@ function Board:draw()
   -- 3. triple ring – alternating red/green
   -------------------------------------------------------
   for i = 1, segmentCount do
-    local startAngle = baseAngle + (i - 1) * segmentAngle
+    local startAngle = baseAngle + (i - 1) * segmentAngle + halfSegmentAngle
     local endAngle   = startAngle + segmentAngle
     local ringColor  = (i % 2 == 1) and colors.tripleRing or colors.doubleRing
     drawRingSector(startAngle, endAngle,
@@ -132,7 +133,7 @@ function Board:draw()
   -- 4. double ring – alternating red/green
   -------------------------------------------------------
   for i = 1, segmentCount do
-    local startAngle = baseAngle + (i - 1) * segmentAngle
+    local startAngle = baseAngle + (i - 1) * segmentAngle + halfSegmentAngle
     local endAngle   = startAngle + segmentAngle
     local ringColor  = (i % 2 == 1) and colors.tripleRing or colors.doubleRing
     drawRingSector(startAngle, endAngle,
@@ -157,17 +158,21 @@ function Board:draw()
   love.graphics.circle("fill", 0, 0, self.innerBull)
 
   -------------------------------------------------------
-  -- 7. numbers
+  -- 7. numbers – unchanged, already centered on the outer rim
   -------------------------------------------------------
+  local numbers = { 20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5 }
   for i = 1, segmentCount do
-    local angle = baseAngle + (i - 1) * segmentAngle + segmentAngle / 2
-    local numberRadius = self.radius + 16
+    local angle = baseAngle + (i - 1) * segmentAngle
+    local numberRadius = self.radius + 10
     local nx = numberRadius * math.cos(angle)
     local ny = numberRadius * math.sin(angle)
-    local numStr = tostring(self.numbers[i])
+
+    local numStr = tostring(numbers[i])
     local w = self.numberFont:getWidth(numStr)
     local h = self.numberFont:getHeight()
-    drawOutlinedText(numStr, nx - w / 2, ny - h / 2, love.graphics.newFont(16), colors.numbers)
+
+    drawOutlinedText(numStr, nx - w / 2, ny - h / 2,
+      self.numberFont, colors.numbers)
   end
 
   love.graphics.pop()
