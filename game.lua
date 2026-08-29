@@ -137,52 +137,89 @@ function Game:joystickreleased(joy, button)
 end
 
 ----------------------------------------------------------------
--- Throw logic – calculates landing position, applies error,
--- creates a Dart instance, updates score, and checks end of game
+--  Game:throwDart ------------------------------------------------
 ----------------------------------------------------------------
 function Game:throwDart(vec)
   local magnitude = math.sqrt(vec.x * vec.x + vec.y * vec.y)
-  local dir = {}
-  if magnitude < 0.01 then
-    dir.x, dir.y = 0, -1 -- default forward if the player taps
+  local forceRatio = magnitude / MAX_FORCE_MAG
+
+  local startPos = self.currentThrow.startPos
+  local floorThreshold = 0.1   -- 10 % of the max force is required to reach the board
+
+  local targetPos
+  local angle
+
+  if forceRatio < floorThreshold then
+    -- **No enough force → dart falls below the screen (floor)**
+    targetPos = { x = startPos.x, y = love.graphics.getHeight() + 50 }
+    angle = math.rad(90)     -- point downwards
   else
-    dir.x = vec.x / magnitude
-    dir.y = vec.y / magnitude
+    -- **Normal throw**
+
+    -- Direction of the flight (opposite of the drag vector)
+    local dir = {}
+    if magnitude < 0.01 then
+      dir.x, dir.y = 0, -1       -- default forward
+    else
+      dir.x = vec.x / magnitude
+      dir.y = vec.y / magnitude
+    end
+
+    -- Distance the dart travels, capped at the board radius
+    local travelDistance = math.min(forceRatio, 1) * self.board.radius
+
+    -- Error scaling: moderate at low force, minimal near 90 %, then grows again
+    local optimumForce = 0.9
+    local errorScale
+    if forceRatio <= optimumForce then
+      errorScale = 1 - (forceRatio / optimumForce)
+    else
+      errorScale = (forceRatio - optimumForce) / (1 - optimumForce)
+    end
+    local baseError = self.board.maxError
+    local offsetX = (math.random() * 2 - 1) * errorScale * baseError
+    local offsetY = (math.random() * 2 - 1) * errorScale * baseError
+
+    targetPos = {
+      x = startPos.x - dir.x * travelDistance + offsetX,
+      y = startPos.y - dir.y * travelDistance + offsetY
+    }
+
+    angle = math.atan2(-dir.y, -dir.x)
   end
 
-  local landingPos = {
-    x = self.board.x + dir.x * self.board.radius,
-    y = self.board.y + dir.y * self.board.radius
-  }
-
-  -- random error inversely proportional to force
-  local forceScale = math.min(magnitude / MAX_FORCE_MAG, 1)
-  local errorScale = self.board.maxError * (1 - forceScale)
-  local offsetX = (math.random() * 2 - 1) * errorScale
-  local offsetY = (math.random() * 2 - 1) * errorScale
-  landingPos.x = landingPos.x + offsetX
-  landingPos.y = landingPos.y + offsetY
-
-  local score = self.board:calculateScore(landingPos)
-
-  local dart = Dart.new(landingPos.x, landingPos.y, score)
+  -- Create the animated dart and compute its score
+  local score = self.board:calculateScore(targetPos)
+  local dart  = Dart.new(startPos, targetPos, score, angle)
   table.insert(self.darts, dart)
 
   table.insert(self.scores, score)
   self.totalScore = self.totalScore + score
   self.throwsLeft = self.throwsLeft - 1
-
-  -- after a dart is thrown
-  if self.throwsLeft <= 0 then
-    self.state = "over"
-  end
 end
 
 ----------------------------------------------------------------
--- UPDATE – no per‑frame logic for now, but keep for future
+--  Game:update -------------------------------------------------
 ----------------------------------------------------------------
 function Game:update(dt)
-  -- placeholder for future animations or timers
+  -- 1. Update all dart animations
+  for _, dart in ipairs(self.darts) do
+    dart:update(dt)
+  end
+
+  -- 2. If all throws are used, wait until every dart stops animating
+  if self.throwsLeft <= 0 then
+    local allDone = true
+    for _, dart in ipairs(self.darts) do
+      if dart.isAnimating then
+        allDone = false
+        break
+      end
+    end
+    if allDone then
+      self.state = "over" -- now show the overlay
+    end
+  end
 end
 
 ----------------------------------------------------------------
