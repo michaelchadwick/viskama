@@ -6,7 +6,7 @@ local Game                      = require "game"
 local UI                        = require "ui"
 local config                    = require "config"
 
-local windowWidth, windowHeight = 800, 600
+local windowWidth, windowHeight = config.game.windowWidth, config.game.windowHeight
 
 local game -- will hold the Game instance
 local ui   -- will hold the UI instance
@@ -15,7 +15,7 @@ local ui   -- will hold the UI instance
 -- LOVE2D callbacks
 -----------------------------------------------------------------------
 function love.load()
-  love.window.setTitle("Viskama")
+  love.window.setTitle(config.game.title)
   love.window.setMode(windowWidth, windowHeight, { resizable = false, vsync = true })
   math.randomseed(os.time())
 

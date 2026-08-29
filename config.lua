@@ -2,6 +2,17 @@
 -- Centralised configuration for board, dart, and UI
 
 return {
+  game = {
+    text         = {
+      lose  = "You lose :(",
+      retry = "Click, touch, or press any key to try again",
+      start = "Click, touch, or press any key to begin",
+      win   = "You win!"
+    },
+    title        = "Viskama",
+    windowWidth  = 800,
+    windowHeight = 600,
+  },
   board = {
     radius            = 200,
     innerBull         = 10,
