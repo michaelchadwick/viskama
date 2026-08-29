@@ -33,6 +33,9 @@ function Board.new(configBoard)
   self.ring                  = configBoard.ring
   self.outerRing             = configBoard.outerRing
 
+  self.score.innerBull       = configBoard.score.innerBull
+  self.score.outerBull       = configBoard.score.outerBull
+
   self.maxError              = configBoard.maxError
   self.maxForceMagnitude     = configBoard.maxForceMagnitude
 
@@ -176,8 +179,8 @@ function Board:calculateScore(pos)
   local dy = pos.y - self.y
   local dist = math.sqrt(dx * dx + dy * dy)
 
-  if dist <= self.innerBull then return 100 end
-  if dist <= self.outerBull then return 75 end
+  if dist <= self.innerBull then return self.score.innerBull end
+  if dist <= self.outerBull then return self.score.outerBull end
   if dist <= self.ring then return 50 end
   if dist <= self.outerRing then return 25 end
   return 0

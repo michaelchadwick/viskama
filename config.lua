@@ -34,7 +34,12 @@ return {
       outerRim    = { 1, 1, 1 },
       numbers     = { 0.8, 0.8, 0.8 },
       floor       = { 0.5, 0.5, 0.5 }
-    }
+    },
+
+    score             = {
+      innerBull = 50,
+      outerBull = 25
+    },
   },
 
   dart = {
