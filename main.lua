@@ -36,8 +36,8 @@ function love.draw()
   if game.state == "title" then
     ui:drawTitle()
   else
-    game:draw()                      -- always show the board & darts
-    if game.state == "over" then     -- overlay only when finished
+    game:draw()                  -- always show the board & darts
+    if game.state == "over" then -- overlay only when finished
       ui:drawOverlay(game.totalScore)
     end
   end
@@ -50,7 +50,7 @@ function love.keypressed(key, scancode, isrepeat)
   elseif game.state == "title" then
     game:reset()
   elseif game.state == "over" then
-    game:reset()     -- restart the round (stay in play)
+    game:reset() -- restart the round (stay in play)
   end
 end
 
@@ -58,7 +58,13 @@ end
 -- Forward all other input to the Game module
 -----------------------------------------------------------------------
 function love.mousepressed(x, y, button, istouch, presses)
-  game:mousepressed(x, y, button)
+  if button == 1 then
+    if game.state == "title" or game.state == "over" then
+      game:reset()
+    else
+      game:mousepressed(x, y, button)
+    end
+  end
 end
 
 function love.mousemoved(x, y, dx, dy, istouch)
@@ -70,7 +76,11 @@ function love.mousereleased(x, y, button, istouch, presses)
 end
 
 function love.touchpressed(id, x, y, dx, dy, pressure)
-  game:touchpressed(id, x, y, dx, dy, pressure)
+  if game.state == "title" or game.state == "over" then
+    game:reset()
+  else
+    game:touchpressed(id, x, y, dx, dy, pressure)
+  end
 end
 
 function love.touchmoved(id, x, y, dx, dy, pressure)
@@ -82,7 +92,13 @@ function love.touchreleased(id, x, y, dx, dy, pressure)
 end
 
 function love.joystickpressed(joy, button)
-  game:joystickpressed(joy, button)
+  if button == 1 then
+    if game.state == "title" or game.state == "over" then
+      game:reset()
+    else
+      game:joystickpressed(joy, button)
+    end
+  end
 end
 
 function love.joystickaxis(joy, axis, value)

@@ -20,7 +20,7 @@ function UI:drawTitle()
   love.graphics.setFont(self.titleFont)
   love.graphics.printf("Viskama", 0, 200, love.graphics.getWidth(), "center")
   love.graphics.setFont(self.smallFont)
-  love.graphics.printf("Press any key to begin", 0, 260, love.graphics.getWidth(), "center")
+  love.graphics.printf("Click, touch, or press any key to begin", 0, 260, love.graphics.getWidth(), "center")
 end
 
 ----------------------------------------------------------------
@@ -38,7 +38,7 @@ function UI:drawScore(finalScore)
   end
   love.graphics.setFont(self.smallFont)
   love.graphics.printf(msg, 0, 260, love.graphics.getWidth(), "center")
-  love.graphics.printf("Press any key to return", 0, 320, love.graphics.getWidth(), "center")
+  love.graphics.printf("Click, touch, or press any key to return", 0, 320, love.graphics.getWidth(), "center")
 end
 
 -- drawOverlay ------------------------------------------------------
@@ -56,7 +56,7 @@ function UI:drawOverlay(finalScore)
 
   love.graphics.setFont(self.smallFont)
   love.graphics.printf(msg, 0, 260, love.graphics.getWidth(), "center")
-  love.graphics.printf("Press any key to play again", 0, 320, love.graphics.getWidth(), "center")
+  love.graphics.printf("Click, touch, or press any key to play again", 0, 320, love.graphics.getWidth(), "center")
 end
 
 return UI
