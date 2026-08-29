@@ -9,27 +9,28 @@ Dart.__index = Dart
 --  ctor – initialise everything and set the start scale
 ----------------------------------------------------------------
 function Dart.new(startPos, targetPos, score, angle, config)
-  local self          = setmetatable({}, Dart)
+  local self             = setmetatable({}, Dart)
 
-  self.startPos       = { x = startPos.x, y = startPos.y }
-  self.targetPos      = { x = targetPos.x, y = targetPos.y }
-  self.x              = startPos.x
-  self.y              = startPos.y
-  self.score          = score
-  self.angle          = angle
+  self.startPos          = { x = startPos.x, y = startPos.y }
+  self.targetPos         = { x = targetPos.x, y = targetPos.y }
+  self.x                 = startPos.x
+  self.y                 = startPos.y
+  self.score             = score
+  self.angle             = angle
 
-  self.elapsed        = 0
-  self.duration       = config.duration
-  self.isAnimating    = true
+  self.elapsed           = 0
+  self.duration          = config.duration
+  self.isAnimating       = true
 
-  self.scaleStart     = config.scaleStart
-  self.scalePeak      = config.scalePeak
-  self.scaleEnd       = config.scaleEnd
+  self.scaleStart        = config.scaleStart
+  self.scalePeak         = config.scalePeak
+  self.scaleEnd          = config.scaleEnd
 
-  self.hitBoard       = score > 0
-  self.crossSize      = config.crossSize
-  self.crossColor     = config.crossColor
-  self.crossLineWidth = config.crossLineWidth
+  self.hitBoard          = score > 0
+  self.crossSize         = config.crossSize
+  self.crossColor        = config.crossColor
+  self.crossOutlineColor = config.crossOutlineColor
+  self.crossLineWidth    = config.crossLineWidth
 
   return self
 end
@@ -88,13 +89,19 @@ function Dart:draw()
     love.graphics.pop()
   else
     if self.hitBoard then
+      local s = self.crossSize
+
+      -- outline (thicker, white)
+      love.graphics.setColor(unpack(self.crossOutlineColor))
+      love.graphics.setLineWidth(self.crossLineWidth + 4)
+      love.graphics.line(self.x - s, self.y, self.x + s, self.y)
+      love.graphics.line(self.x, self.y - s, self.x, self.y + s)
+
+      -- main cross (actual colour)
       love.graphics.setColor(unpack(self.crossColor))
       love.graphics.setLineWidth(self.crossLineWidth)
-      local s = self.crossSize
-      love.graphics.line(self.x - s, self.y,
-        self.x + s, self.y)
-      love.graphics.line(self.x, self.y - s,
-        self.x, self.y + s)
+      love.graphics.line(self.x - s, self.y, self.x + s, self.y)
+      love.graphics.line(self.x, self.y - s, self.x, self.y + s)
     end
   end
 end

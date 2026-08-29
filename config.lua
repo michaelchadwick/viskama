@@ -38,14 +38,15 @@ return {
   },
 
   dart = {
-    speed          = 400,
-    duration       = 0.6,
-    scaleStart     = 0.2,
-    scalePeak      = 1.0,
-    scaleEnd       = 0.2,
-    crossSize      = 12,
-    crossColor     = { 1, 0.9, 0 },
-    crossLineWidth = 4
+    speed             = 400,
+    duration          = 0.6,
+    scaleStart        = 0.2,
+    scalePeak         = 1.0,
+    scaleEnd          = 0.2,
+    crossSize         = 12,
+    crossColor        = { 0.9, 0, 0 },
+    crossOutlineColor = { 0.9, 0.9, 0.9 },
+    crossLineWidth    = 3
   },
 
   ui = {
