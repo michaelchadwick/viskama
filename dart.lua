@@ -72,7 +72,7 @@ function Dart:draw()
 
     love.graphics.push()
     love.graphics.translate(self.x, self.y)
-    love.graphics.rotate(self.angle)
+    love.graphics.rotate(self.angle + 80)
     love.graphics.scale(self.scale, self.scale)
 
     -- shaft
