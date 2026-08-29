@@ -1,31 +1,35 @@
 -- dart.lua
--- A single dart that flies from the “hand” to the board,
--- scaling up while in flight and shrinking again when it lands.
-
 local Dart = {}
 Dart.__index = Dart
 
 ----------------------------------------------------------------
---  ctor – add a flag that tells us if the dart landed on the board
+--  ctor – receives dart configuration
 ----------------------------------------------------------------
-function Dart.new(startPos, targetPos, score, angle, boardRadius)
-  local self       = setmetatable({}, Dart)
+----------------------------------------------------------------
+--  ctor – initialise everything and set the start scale
+----------------------------------------------------------------
+function Dart.new(startPos, targetPos, score, angle, config)
+  local self          = setmetatable({}, Dart)
 
-  self.startPos    = { x = startPos.x, y = startPos.y }
-  self.targetPos   = { x = targetPos.x, y = targetPos.y }
-  self.x           = startPos.x
-  self.y           = startPos.y
-  self.score       = score
-  self.angle       = angle
+  self.startPos       = { x = startPos.x, y = startPos.y }
+  self.targetPos      = { x = targetPos.x, y = targetPos.y }
+  self.x              = startPos.x
+  self.y              = startPos.y
+  self.score          = score
+  self.angle          = angle
 
-  self.elapsed     = 0
-  self.duration    = 0.6
-  self.isAnimating = true
-  self.scale       = 0.2
+  self.elapsed        = 0
+  self.duration       = config.duration
+  self.isAnimating    = true
 
-  -- Did we hit the board?  (score > 0 ⇒ inside the board)
-  self.hitBoard    = score > 0
-  self.boardRadius = boardRadius
+  self.scaleStart     = config.scaleStart
+  self.scalePeak      = config.scalePeak
+  self.scaleEnd       = config.scaleEnd
+
+  self.hitBoard       = score > 0
+  self.crossSize      = config.crossSize
+  self.crossColor     = config.crossColor
+  self.crossLineWidth = config.crossLineWidth
 
   return self
 end
@@ -37,27 +41,26 @@ function Dart:update(dt)
   if not self.isAnimating then return end
 
   self.elapsed = self.elapsed + dt
-  local t      = math.min(self.elapsed / self.duration, 1)
+  local t = math.min(self.elapsed / self.duration, 1)
 
-  self.x       = self.startPos.x + (self.targetPos.x - self.startPos.x) * t
-  self.y       = self.startPos.y + (self.targetPos.y - self.startPos.y) * t
+  self.x = self.startPos.x + (self.targetPos.x - self.startPos.x) * t
+  self.y = self.startPos.y + (self.targetPos.y - self.startPos.y) * t
 
-  -- Scale: small → peak → small
-  local peak   = 1.0
-  local min    = 0.2
-  local scale  = min + (peak - min) * (1 - math.abs(t - 0.5) * 2)
-  self.scale   = scale
+  local scale = self.scaleStart +
+      (self.scalePeak - self.scaleStart) * (1 - math.abs(t - 0.5) * 2)
+
+  self.scale = scale
 
   if t >= 1 then
     self.isAnimating = false
     self.x = self.targetPos.x
     self.y = self.targetPos.y
-    self.scale = min
+    self.scale = self.scaleEnd
   end
 end
 
 ----------------------------------------------------------------
---  Draw – use a bright cross when the dart has finished
+--  Draw – bright landing cross when finished
 ----------------------------------------------------------------
 function Dart:draw()
   if self.isAnimating then
@@ -71,11 +74,11 @@ function Dart:draw()
     love.graphics.rotate(self.angle)
     love.graphics.scale(self.scale, self.scale)
 
-    -- shaft (grey)
+    -- shaft
     love.graphics.setColor(0.6, 0.6, 0.6)
     love.graphics.rectangle("fill", -shaftW / 2, -shaftH / 2, shaftW, shaftH)
 
-    -- tip (red triangle)
+    -- tip
     love.graphics.setColor(1, 0, 0)
     love.graphics.polygon("fill",
       0, -shaftH / 2,
@@ -84,17 +87,15 @@ function Dart:draw()
 
     love.graphics.pop()
   else
-    -- landed dart – show a bright, larger cross only if it hit the board
     if self.hitBoard then
-      love.graphics.setColor(1, 0.9, 0)       -- bright yellow
-      love.graphics.setLineWidth(4)
-      local size = 12
-      love.graphics.line(self.x - size, self.y,
-        self.x + size, self.y)
-      love.graphics.line(self.x, self.y - size,
-        self.x, self.y + size)
+      love.graphics.setColor(unpack(self.crossColor))
+      love.graphics.setLineWidth(self.crossLineWidth)
+      local s = self.crossSize
+      love.graphics.line(self.x - s, self.y,
+        self.x + s, self.y)
+      love.graphics.line(self.x, self.y - s,
+        self.x, self.y + s)
     end
-    -- if it missed, nothing is drawn
   end
 end
 

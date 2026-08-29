@@ -4,12 +4,9 @@
 local Board                     = require "board"
 local Game                      = require "game"
 local UI                        = require "ui"
+local config                    = require "config"
 
 local windowWidth, windowHeight = 800, 600
-
--- The UI module creates its own fonts, but the game needs a small font for
--- the in‑game HUD.  We create it here and pass it explicitly to `Game`.
-local smallFont                 = love.graphics.newFont(24)
 
 local game -- will hold the Game instance
 local ui   -- will hold the UI instance
@@ -22,9 +19,9 @@ function love.load()
   love.window.setMode(windowWidth, windowHeight, { resizable = false, vsync = true })
   math.randomseed(os.time())
 
-  local board = Board.new(windowWidth / 2, windowHeight / 2, 200)
-  game        = Game.new(board, smallFont) -- pass the font to Game
-  ui          = UI.new()
+  local board = Board.new(config.board)
+  game        = Game.new(board, config)
+  ui          = UI.new(config)
 end
 
 function love.update(dt)

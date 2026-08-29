@@ -1,28 +1,24 @@
 -- board.lua
--- Holds the dartboard geometry and scoring logic
-
 local Board = {}
 Board.__index = Board
 
--- -------------------------------------------------------
---  Board.new – set the bullseye radii to a much smaller size
--- -------------------------------------------------------
-function Board.new(x, y, radius)
+-- constructor now receives the board configuration table
+function Board.new(configBoard)
   local self                 = setmetatable({}, Board)
 
-  self.x                     = x or 400
-  self.y                     = y or 300
-  self.radius                = radius or 200
+  self.x                     = 400
+  self.y                     = 300
+  self.radius                = configBoard.radius
 
-  -- ----------------------------------------
-  --  Bullseye radii (much smaller now)
-  -- ----------------------------------------
-  self.innerBull             = self.radius * 0.04 -- ~8 px for a 200‑px board
-  self.outerBull             = self.radius * 0.09 -- ~18 px
+  self.innerBull             = configBoard.innerBull
+  self.outerBull             = configBoard.outerBull
+  self.ring                  = configBoard.ring
+  self.outerRing             = configBoard.outerRing
 
-  -- ----------------------------------------
-  --  Derived radii for the rings
-  -- ----------------------------------------
+  self.maxError              = configBoard.maxError
+  self.maxForceMagnitude     = configBoard.maxForceMagnitude
+
+  -- derived radii for the rings
   self.doubleRingWidth       = self.radius * 0.10
   self.doubleRingInnerRadius = self.radius - self.doubleRingWidth
 
@@ -30,41 +26,24 @@ function Board.new(x, y, radius)
   self.tripleRingOuterRadius = self.doubleRingInnerRadius - self.tripleRingWidth
   self.tripleRingInnerRadius = self.tripleRingOuterRadius - self.tripleRingWidth
 
-  -- ----------------------------------------
-  --  Score‑related radii (used by calculateScore)
-  -- ----------------------------------------
-  self.ring                  = self.tripleRingInnerRadius -- inner single area
-  self.outerRing             = self.radius       -- outer single area (double ring)
-
-  -- ----------------------------------------
-  --  Misc. (used for error jitter)
-  -- ----------------------------------------
-  self.maxError              = 12 -- maximum random offset (pixels)
-
-  -- number font
+  self.colors                = configBoard.colors
   self.numberFont            = love.graphics.newFont(14)
 
   return self
 end
 
--- -------------------------------------------------------
---  Board:draw – realistic dartboard with alternating
---  red/green colors for the triple and double rings,
---  light‑grey numbers, and a small green‑red bullseye
--- -------------------------------------------------------
+----------------------------------------------------------------
+--  draw – uses the colours from the config table
+----------------------------------------------------------------
 function Board:draw()
   love.graphics.push()
   love.graphics.translate(self.x, self.y)
 
   local segmentCount = 20
   local segmentAngle = math.rad(18)  -- 360° / 20
-  local baseAngle    = math.rad(-97) -- 20 is at the top (97 instead of 90 to better align numbers)
+  local baseAngle    = math.rad(-99) -- 20 is at the top (99 instead of 90 to better align numbers)
 
-  -- base colors
-  local colorA       = { 0.1, 0.1, 0.1 } -- dark gray
-  local colorB       = { 0.8, 0.6, 0.2 } -- orange‑ish
-  local colorRed     = { 0.7, 0, 0 }
-  local colorGreen   = { 0, 0.7, 0 }
+  local colors       = self.colors
 
   -- helper: draw a ring sector (filled polygon)
   local function drawRingSector(startAngle, endAngle, innerR, outerR, color)
@@ -92,7 +71,7 @@ function Board:draw()
   for i = 1, segmentCount do
     local startAngle = baseAngle + (i - 1) * segmentAngle
     local endAngle   = startAngle + segmentAngle
-    local color      = (i % 2 == 1) and colorA or colorB
+    local color      = (i % 2 == 1) and colors.innerSingle or colors.outerSingle
     drawRingSector(startAngle, endAngle,
       self.outerBull,             -- inner radius
       self.tripleRingInnerRadius, -- outer radius
@@ -105,7 +84,7 @@ function Board:draw()
   for i = 1, segmentCount do
     local startAngle = baseAngle + (i - 1) * segmentAngle
     local endAngle   = startAngle + segmentAngle
-    local color      = (i % 2 == 1) and colorA or colorB
+    local color      = (i % 2 == 1) and colors.innerSingle or colors.outerSingle
     drawRingSector(startAngle, endAngle,
       self.tripleRingOuterRadius, -- inner radius
       self.doubleRingInnerRadius, -- outer radius
@@ -118,7 +97,7 @@ function Board:draw()
   for i = 1, segmentCount do
     local startAngle = baseAngle + (i - 1) * segmentAngle
     local endAngle   = startAngle + segmentAngle
-    local ringColor  = (i % 2 == 1) and colorRed or colorGreen
+    local ringColor  = (i % 2 == 1) and colors.tripleRing or colors.doubleRing
     drawRingSector(startAngle, endAngle,
       self.tripleRingInnerRadius,
       self.tripleRingOuterRadius,
@@ -131,7 +110,7 @@ function Board:draw()
   for i = 1, segmentCount do
     local startAngle = baseAngle + (i - 1) * segmentAngle
     local endAngle   = startAngle + segmentAngle
-    local ringColor  = (i % 2 == 1) and colorRed or colorGreen
+    local ringColor  = (i % 2 == 1) and colors.tripleRing or colors.doubleRing
     drawRingSector(startAngle, endAngle,
       self.doubleRingInnerRadius,
       self.radius,
@@ -141,32 +120,31 @@ function Board:draw()
   -------------------------------------------------------
   -- 5. outer rim (white)
   -------------------------------------------------------
-  love.graphics.setColor(1, 1, 1)
+  love.graphics.setColor(colors.outerRim)
   love.graphics.setLineWidth(3)
   love.graphics.circle("line", 0, 0, self.radius + 3)
 
   -------------------------------------------------------
-  -- 6. bullseye – small green outer bull, tiny red inner bull
+  -- 6. bullseyes
   -------------------------------------------------------
-  love.graphics.setColor(0, 1, 0) -- green outer bull
+  love.graphics.setColor(colors.innerBull)
   love.graphics.circle("fill", 0, 0, self.outerBull)
-  love.graphics.setColor(1, 0, 0) -- red inner bull
+  love.graphics.setColor(colors.outerBull)
   love.graphics.circle("fill", 0, 0, self.innerBull)
 
   -------------------------------------------------------
-  -- 7. numbers – light grey, positioned just outside the rim
+  -- 7. numbers
   -------------------------------------------------------
   local numbers = { 20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5 }
-  love.graphics.setColor(0.95, 0.95, 0.95) -- light grey
   for i = 1, segmentCount do
-    local angle = (baseAngle + (i - 1) * segmentAngle + segmentAngle / 2)
+    local angle = baseAngle + (i - 1) * segmentAngle + segmentAngle / 2
     local numberRadius = self.radius + 10
-    local nudgeAmount = 6 -- to better align numbers
-    local nx = numberRadius * math.cos(angle) - nudgeAmount
-    local ny = numberRadius * math.sin(angle) - nudgeAmount / 2
+    local nx = numberRadius * math.cos(angle) - 6
+    local ny = numberRadius * math.sin(angle) - 4
     local numStr = tostring(numbers[i])
     local w = self.numberFont:getWidth(numStr)
     local h = self.numberFont:getHeight()
+    love.graphics.setColor(colors.numbers)
     love.graphics.print(numStr, nx - w / 2, ny - h / 2)
   end
 
@@ -174,24 +152,18 @@ function Board:draw()
 end
 
 ----------------------------------------------------------------
--- Simple radial scoring
+--  scoring
 ----------------------------------------------------------------
 function Board:calculateScore(pos)
   local dx = pos.x - self.x
   local dy = pos.y - self.y
   local dist = math.sqrt(dx * dx + dy * dy)
 
-  if dist <= self.innerBull then
-    return 100
-  elseif dist <= self.outerBull then
-    return 75
-  elseif dist <= self.ring then
-    return 50
-  elseif dist <= self.outerRing then
-    return 25
-  else
-    return 0
-  end
+  if dist <= self.innerBull then return 100 end
+  if dist <= self.outerBull then return 75 end
+  if dist <= self.ring then return 50 end
+  if dist <= self.outerRing then return 25 end
+  return 0
 end
 
 return Board
