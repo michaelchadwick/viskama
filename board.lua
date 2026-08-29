@@ -33,8 +33,10 @@ function Board.new(configBoard)
   self.ring                  = configBoard.ring
   self.outerRing             = configBoard.outerRing
 
-  self.score.innerBull       = configBoard.score.innerBull
-  self.score.outerBull       = configBoard.score.outerBull
+  self.score                 = {
+    innerBull = configBoard.score.innerBull,
+    outerBull = configBoard.score.outerBull
+  }
 
   self.maxError              = configBoard.maxError
   self.maxForceMagnitude     = configBoard.maxForceMagnitude
@@ -48,6 +50,7 @@ function Board.new(configBoard)
   self.tripleRingInnerRadius = self.tripleRingOuterRadius - self.tripleRingWidth
 
   self.colors                = configBoard.colors
+  self.numbers               = { 20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5 }
   self.numberFont            = love.graphics.newFont(14)
 
   return self
@@ -62,7 +65,7 @@ function Board:draw()
 
   local segmentCount = 20
   local segmentAngle = math.rad(18)  -- 360° / 20
-  local baseAngle    = math.rad(-99) -- 20 is at the top (99 instead of 90 to better align numbers)
+  local baseAngle    = math.rad(-90) -- 20 is at the top
 
   local colors       = self.colors
 
@@ -156,13 +159,12 @@ function Board:draw()
   -------------------------------------------------------
   -- 7. numbers
   -------------------------------------------------------
-  local numbers = { 20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5 }
   for i = 1, segmentCount do
     local angle = baseAngle + (i - 1) * segmentAngle + segmentAngle / 2
     local numberRadius = self.radius + 10
     local nx = numberRadius * math.cos(angle)
     local ny = numberRadius * math.sin(angle)
-    local numStr = tostring(numbers[i])
+    local numStr = tostring(self.numbers[i])
     local w = self.numberFont:getWidth(numStr)
     local h = self.numberFont:getHeight()
     drawOutlinedText(numStr, nx - w / 2, ny - h / 2, self.numberFont, colors.numbers)
@@ -181,9 +183,26 @@ function Board:calculateScore(pos)
 
   if dist <= self.innerBull then return self.score.innerBull end
   if dist <= self.outerBull then return self.score.outerBull end
-  if dist <= self.ring then return 50 end
-  if dist <= self.outerRing then return 25 end
-  return 0
+  local multiplier
+  if dist <= self.tripleRingInnerRadius then     -- inner single
+    multiplier = 1
+  elseif dist <= self.tripleRingOuterRadius then -- triple
+    multiplier = 3
+  elseif dist <= self.doubleRingInnerRadius then -- outer single
+    multiplier = 1
+  elseif dist <= self.radius then                -- double
+    multiplier = 2
+  else
+    return 0 -- missed the board
+  end
+
+  local angle = math.atan2(dx, -dy) -- dx, -dy rotates the system
+  if angle < 0 then angle = angle + 2 * math.pi end
+
+  local sectorIndex = math.floor(angle / (2 * math.pi / 20)) + 1
+  local sectorValue = self.numbers[sectorIndex] or 0
+
+  return sectorValue * multiplier
 end
 
 return Board
