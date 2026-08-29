@@ -2,6 +2,24 @@
 local Board = {}
 Board.__index = Board
 
+-- ------------------------------------------------------------
+--  Helper: draw text with a thin white outline
+-- ------------------------------------------------------------
+local function drawOutlinedText(txt, x, y, font, color)
+  love.graphics.setFont(font)
+
+  -- draw the outline in white
+  love.graphics.setColor(1, 1, 1)
+  local offsets = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } }
+  for _, off in ipairs(offsets) do
+    love.graphics.print(txt, x + off[1], y + off[2])
+  end
+
+  -- draw the real text
+  love.graphics.setColor(unpack(color))
+  love.graphics.print(txt, x, y)
+end
+
 -- constructor now receives the board configuration table
 function Board.new(configBoard)
   local self                 = setmetatable({}, Board)
@@ -139,13 +157,12 @@ function Board:draw()
   for i = 1, segmentCount do
     local angle = baseAngle + (i - 1) * segmentAngle + segmentAngle / 2
     local numberRadius = self.radius + 10
-    local nx = numberRadius * math.cos(angle) - 6
-    local ny = numberRadius * math.sin(angle) - 4
+    local nx = numberRadius * math.cos(angle)
+    local ny = numberRadius * math.sin(angle)
     local numStr = tostring(numbers[i])
     local w = self.numberFont:getWidth(numStr)
     local h = self.numberFont:getHeight()
-    love.graphics.setColor(colors.numbers)
-    love.graphics.print(numStr, nx - w / 2, ny - h / 2)
+    drawOutlinedText(numStr, nx - w / 2, ny - h / 2, self.numberFont, colors.numbers)
   end
 
   love.graphics.pop()
