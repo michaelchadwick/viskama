@@ -162,7 +162,7 @@ function Board:draw()
   -------------------------------------------------------
   for i = 1, segmentCount do
     local angle = baseAngle + (i - 1) * segmentAngle
-    local numberRadius = self.radius + 10
+    local numberRadius = self.radius + 20
     local nx = numberRadius * math.cos(angle)
     local ny = numberRadius * math.sin(angle)
 
