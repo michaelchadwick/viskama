@@ -160,13 +160,12 @@ function Game:throwDart(vec)
     angle = math.atan2(-dir.y, -dir.x)
   end
 
-  local score       = self.board:calculateScore(targetPos)
-  local dart        = Dart.new(startPos, targetPos, score, angle, self.config.dart)
-  dart.displayScore = scoreStringFor(targetPos, self.board)
+  local score = self.board:calculateScore(targetPos)
+  local dart  = Dart.new(startPos, targetPos, score, angle,
+    self.config.dart, self.board)
 
   table.insert(self.darts, dart)
-  table.insert(self.scores, score)
-  self.totalScore = self.totalScore + score
+
   self.throwsLeft = self.throwsLeft - 1
 end
 
@@ -176,6 +175,15 @@ end
 function Game:update(dt)
   for _, dart in ipairs(self.darts) do
     dart:update(dt)
+
+    if not dart.isAnimating and not dart.scoreAdded then
+      -- The dart has landed – add its score now
+      self.totalScore = self.totalScore + dart.score
+      dart.scoreAdded = true
+
+      -- Build the human‑readable score string
+      dart.displayScore = scoreStringFor(dart.targetPos, self.board)
+    end
   end
 
   if self.throwsLeft <= 0 then

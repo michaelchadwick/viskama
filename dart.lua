@@ -30,6 +30,8 @@ function Dart.new(startPos, targetPos, score, angle, config)
   self.crossOutlineColor = config.crossOutlineColor
   self.crossLineWidth    = config.crossLineWidth
 
+  self.scoreAdded        = false
+
   return self
 end
 
