@@ -160,14 +160,13 @@ function Board:draw()
   -------------------------------------------------------
   -- 7. numbers – unchanged, already centered on the outer rim
   -------------------------------------------------------
-  local numbers = { 20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5 }
   for i = 1, segmentCount do
     local angle = baseAngle + (i - 1) * segmentAngle
     local numberRadius = self.radius + 10
     local nx = numberRadius * math.cos(angle)
     local ny = numberRadius * math.sin(angle)
 
-    local numStr = tostring(numbers[i])
+    local numStr = tostring(self.numbers[i])
     local w = self.numberFont:getWidth(numStr)
     local h = self.numberFont:getHeight()
 
