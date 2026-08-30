@@ -50,7 +50,7 @@ function Board.new(configBoard)
   self.tripleRingOuterRadius = self.tripleRingInnerRadius + self.tripleRingWidth
 
   self.colors                = configBoard.colors
-  self.numbers               = { 20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5 }
+  self.numbers               = configBoard.numbers
   self.numberFont            = love.graphics.newFont(14)
 
   return self
@@ -158,7 +158,7 @@ function Board:draw()
   love.graphics.circle("fill", 0, 0, self.innerBull)
 
   -------------------------------------------------------
-  -- 7. numbers – unchanged, already centered on the outer rim
+  -- 7. numbers
   -------------------------------------------------------
   for i = 1, segmentCount do
     local angle = baseAngle + (i - 1) * segmentAngle

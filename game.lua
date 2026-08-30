@@ -1,9 +1,43 @@
 -- game.lua
 local Board  = require "board"
 local Dart   = require "dart"
+local config = require "config"
 
 local Game   = {}
 Game.__index = Game
+
+----------------------------------------------------------------
+--  Local helper – turns a landing position into a string like
+--  “D20”, “T18”, “IB50”, “OB25” or “M0”.
+----------------------------------------------------------------
+local function scoreStringFor(pos, board)
+  local dx = pos.x - board.x
+  local dy = pos.y - board.y
+  local dist = math.sqrt(dx * dx + dy * dy)
+
+  if dist <= board.innerBull then
+    return "IB50"
+  elseif dist <= board.outerBull then
+    return "OB25"
+  end
+
+  local angle = math.atan2(dx, -dy)
+  if angle < 0 then angle = angle + 2 * math.pi end
+  local sectorIndex = math.floor(angle / (2 * math.pi / 20)) + 1
+  local sectorValue = config.board.numbers[sectorIndex] or 0
+
+  if dist <= board.tripleRingInnerRadius then
+    return tostring(sectorValue)
+  elseif dist <= board.tripleRingOuterRadius then
+    return "T" .. sectorValue
+  elseif dist <= board.doubleRingInnerRadius then
+    return tostring(sectorValue)
+  elseif dist <= board.radius then
+    return "D" .. sectorValue
+  else
+    return "M0"
+  end
+end
 
 ----------------------------------------------------------------
 --  ctor – receives the board and the full configuration
@@ -50,7 +84,7 @@ function Game:reset()
 end
 
 ----------------------------------------------------------------
---  Input handling (unchanged)
+--  Input handling
 ----------------------------------------------------------------
 function Game:mousepressed(x, y, button)
   if self.state ~= "play" or button ~= 1 then return end
@@ -126,10 +160,11 @@ function Game:throwDart(vec)
     angle = math.atan2(-dir.y, -dir.x)
   end
 
-  local score = self.board:calculateScore(targetPos)
-  local dart  = Dart.new(startPos, targetPos, score, angle, self.config.dart)
-  table.insert(self.darts, dart)
+  local score       = self.board:calculateScore(targetPos)
+  local dart        = Dart.new(startPos, targetPos, score, angle, self.config.dart)
+  dart.displayScore = scoreStringFor(targetPos, self.board)
 
+  table.insert(self.darts, dart)
   table.insert(self.scores, score)
   self.totalScore = self.totalScore + score
   self.throwsLeft = self.throwsLeft - 1
@@ -158,7 +193,7 @@ function Game:update(dt)
 end
 
 ----------------------------------------------------------------
---  Draw – board, darts, HUD
+--  Draw – board, darts and their values, pointer, force meter HUD
 ----------------------------------------------------------------
 function Game:draw()
   love.graphics.clear(unpack(self.board.colors.background))
@@ -209,12 +244,23 @@ function Game:draw()
     love.graphics.print(txt, meterX + (meterW - txtW) / 2, meterY - 20)
   end
 
-  -- HUD
+  -- HUD: throw, overall score --- individual dart scores
   local currentThrowNumber = math.min(3, 4 - self.throwsLeft)
   love.graphics.setFont(self.font)
   love.graphics.setColor(unpack(self.uiColors.hud))
   love.graphics.print("Throw " .. currentThrowNumber .. " of 3", 10, 10)
   love.graphics.print("Total Score: " .. self.totalScore, 10, 40)
+
+  local x = love.graphics.getWidth() - 10
+  local y = 10
+  local lineHeight = 20
+  for i, dart in ipairs(self.darts) do
+    local txt = dart.displayScore or ""
+    local w = self.font:getWidth(txt)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.setFont(self.font)
+    love.graphics.print(txt, x - w, y + (i - 1) * lineHeight)
+  end
 end
 
 return Game

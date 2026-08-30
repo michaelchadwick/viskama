@@ -3,9 +3,6 @@ local Dart = {}
 Dart.__index = Dart
 
 ----------------------------------------------------------------
---  ctor – receives dart configuration
-----------------------------------------------------------------
-----------------------------------------------------------------
 --  ctor – initialise everything and set the start scale
 ----------------------------------------------------------------
 function Dart.new(startPos, targetPos, score, angle, config)
@@ -17,6 +14,7 @@ function Dart.new(startPos, targetPos, score, angle, config)
   self.y                 = startPos.y
   self.score             = score
   self.angle             = angle
+  self.displayScore      = ""
 
   self.elapsed           = 0
   self.duration          = config.duration
