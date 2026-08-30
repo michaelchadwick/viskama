@@ -10,6 +10,50 @@ local windowWidth, windowHeight = config.game.windowWidth, config.game.windowHei
 
 local game -- will hold the Game instance
 local ui   -- will hold the UI instance
+local fileModTimes              = {}
+
+----------------------------------------------------------------
+--  Reload a module and return success status
+----------------------------------------------------------------
+local function reloadModule(name)
+  package.loaded[name] = nil
+  local ok, mod = pcall(require, name)
+  if not ok then
+    print("Error reloading module '" .. name .. "': " .. tostring(mod))
+  end
+  return ok
+end
+
+----------------------------------------------------------------
+--  Watch files for changes – call this each frame
+----------------------------------------------------------------
+local function watchFiles()
+  for name, _ in pairs(package.loaded) do
+    if type(name) == "string" and name ~= "main" then
+      local path = name:gsub("%.", "/") .. ".lua"
+      local info = love.filesystem.getInfo(path)
+      if info then
+        local last = fileModTimes[path]
+        if not last or info.modtime > last then
+          fileModTimes[path] = info.modtime
+          if reloadModule(name) then
+            -- re‑import updated modules and rebuild everything
+            if name == "board" then
+              Board = require "board"
+            elseif name == "game" then
+              Game = require "game"
+            elseif name == "ui" then
+              UI = require "ui"
+            end
+            local board = Board.new(config.board)
+            game        = Game.new(board, config)
+            ui          = UI.new(config)
+          end
+        end
+      end
+    end
+  end
+end
 
 -----------------------------------------------------------------------
 -- LOVE2D callbacks
@@ -26,6 +70,8 @@ end
 
 function love.update(dt)
   game:update(dt)
+  -- comment out the next line for actual production
+  watchFiles(dt)
 end
 
 -- draw ------------------------------------------------------------
