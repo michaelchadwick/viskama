@@ -45,9 +45,9 @@ function Board.new(configBoard)
   self.doubleRingWidth       = self.radius * 0.10
   self.doubleRingInnerRadius = self.radius - self.doubleRingWidth
 
-  self.tripleRingWidth       = self.radius * 0.05
-  self.tripleRingOuterRadius = self.doubleRingInnerRadius - self.tripleRingWidth
-  self.tripleRingInnerRadius = self.tripleRingOuterRadius - self.tripleRingWidth
+  self.tripleRingWidth       = self.radius * 0.04 -- ~4 % of radius
+  self.tripleRingInnerRadius = self.outerBull + self.radius * 0.40
+  self.tripleRingOuterRadius = self.tripleRingInnerRadius + self.tripleRingWidth
 
   self.colors                = configBoard.colors
   self.numbers               = { 20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5 }
