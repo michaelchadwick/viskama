@@ -43,25 +43,29 @@ end
 --  ctor – receives the board and the full configuration
 ----------------------------------------------------------------
 function Game.new(board, config)
-  local self        = setmetatable({}, Game)
+  local self             = setmetatable({}, Game)
 
-  self.board        = board
-  self.config       = config
-  self.state        = "title"
+  self.board             = board
+  self.config            = config
+  self.state             = "title"
 
-  self.uiColors     = config.ui.colors
-  self.font         = love.graphics.newFont(config.ui.smallFontSize)
+  self.uiColors          = config.ui.colors
+  self.font              = love.graphics.newFont(config.ui.smallFontSize)
 
-  self.throwsLeft   = 3
-  self.scores       = {}
-  self.totalScore   = 0
-  self.darts        = {}
+  self.throwsLeft        = 3
+  self.scores            = {}
+  self.totalScore        = 0
+  self.darts             = {}
 
-  self.currentThrow = {
+  self.currentThrow      = {
     holding  = false,
     startPos = { x = 0, y = 0 },
     lastPos  = { x = 0, y = 0 }
   }
+
+  self.gameOverDelay     = 0.35 -- seconds to wait after the last dart lands
+  self.gameOverTimer     = 0    -- accumulates time
+  self.waitingForOverlay = false
 
   return self
 end
@@ -81,6 +85,9 @@ function Game:reset()
   self.currentThrow.startPos.y = 0
   self.currentThrow.lastPos.x  = 0
   self.currentThrow.lastPos.y  = 0
+
+  self.gameOverTimer           = 0
+  self.waitingForOverlay       = false
 end
 
 ----------------------------------------------------------------
@@ -195,7 +202,16 @@ function Game:update(dt)
       end
     end
     if allDone then
-      self.state = "over"
+      if not self.waitingForOverlay then
+        self.waitingForOverlay = true
+        self.gameOverTimer = 0
+      else
+        self.gameOverTimer = self.gameOverTimer + dt
+        if self.gameOverTimer >= self.gameOverDelay then
+          self.state = "over" -- now show the overlay
+          self.waitingForOverlay = false
+        end
+      end
     end
   end
 end
