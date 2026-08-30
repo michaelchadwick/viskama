@@ -29,8 +29,8 @@ return {
       outerBull   = { 0.91, 0.184, 0.153 },
       innerSingle = { 0.1, 0.1, 0.1 },
       outerSingle = { 0.98, 0.89, 0.725 },
-      tripleRing  = { 0.91, 0.184, 0.153 },
-      doubleRing  = { 0.22, 0.573, 0.204 },
+      tripleRing  = { 0.22, 0.573, 0.204 },
+      doubleRing  = { 0.91, 0.184, 0.153 },
       outerRim    = { 1, 1, 1 },
       numbers     = { 0.8, 0.8, 0.8 },
       floor       = { 0.5, 0.5, 0.5 }
