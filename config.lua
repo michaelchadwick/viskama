@@ -47,20 +47,21 @@ return {
   },
 
   dart = {
-    speed             = 400,
-    duration          = 0.6,
-    scaleStart        = 0.2,
-    scalePeak         = 1.0,
-    scaleEnd          = 0.2,
-    crossSize         = 8,
-    crossColor        = { 1, 1, 1 },
-    crossOutlineColor = { 0.1, 0.1, 0.1 },
-    crossLineWidth    = 2,
-    colors            = {
-      unholdDot = { 0, 0, 1 },
-      holdDot   = { 0, 1, 0 },
-      dragLine  = { 0, 0.5, 0 },
-      shaft     = { 0.6, 0.6, 0.6 }
+    speed          = 400,
+    duration       = 0.6,
+    scaleStart     = 0.2,
+    scalePeak      = 1.0,
+    scaleEnd       = 0.2,
+    crossSize      = 8,
+    crossLineWidth = 2,
+    colors         = {
+      cross        = { 1, 1, 1 },
+      crossOutline = { 0.1, 0.1, 0.1 },
+      unholdDot    = { 0, 0, 1 },
+      holdDot      = { 0, 1, 0 },
+      dragLine     = { 0, 0.5, 0 },
+      shaft        = { 0.6, 0.6, 0.6 },
+      tip          = { 1, 0, 0 }
     }
   },
 
