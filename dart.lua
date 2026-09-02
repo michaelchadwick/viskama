@@ -93,14 +93,14 @@ function Dart:draw()
       -- outline (thicker, white)
       love.graphics.setColor(unpack(self.colors.crossOutline))
       love.graphics.setLineWidth(self.crossLineWidth + 4)
-      love.graphics.line(self.x - s, self.y, self.x + s, self.y)
-      love.graphics.line(self.x, self.y - s, self.x, self.y + s)
+      love.graphics.line(self.x - s, self.y - s, self.x + s, self.y + s)
+      love.graphics.line(self.x + s, self.y - s, self.x - s, self.y + s)
 
       -- main cross (actual colour)
       love.graphics.setColor(unpack(self.colors.cross))
       love.graphics.setLineWidth(self.crossLineWidth)
-      love.graphics.line(self.x - s, self.y, self.x + s, self.y)
-      love.graphics.line(self.x, self.y - s, self.x, self.y + s)
+      love.graphics.line(self.x - s, self.y - s, self.x + s, self.y + s)
+      love.graphics.line(self.x + s, self.y - s, self.x - s, self.y + s)
     end
   end
 end
