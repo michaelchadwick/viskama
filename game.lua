@@ -150,7 +150,8 @@ function Game:throwDart(vec)
       dir.y = vec.y / magnitude
     end
 
-    local travelDistance = math.min(forceRatio, 1) * self.board.radius
+    local travelMod = 1.75
+    local travelDistance = math.min(forceRatio, 1) * self.board.radius * travelMod
 
     local optimumForce = 0.9
     local errorScale
