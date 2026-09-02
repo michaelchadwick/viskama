@@ -85,7 +85,9 @@ end
 function love.update(dt)
   game:update(dt)
   -- comment out the next line for actual production
-  watchFiles(dt)
+  if config.env == 'development' then
+    watchFiles(dt)
+  end
 end
 
 -- draw ------------------------------------------------------------

@@ -2,6 +2,7 @@
 -- Centralised configuration for board, dart, and UI
 
 return {
+  env = 'development',
   game = {
     text         = {
       lose  = "You lose :(",
