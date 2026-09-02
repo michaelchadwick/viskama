@@ -187,6 +187,7 @@ function Board:calculateScore(pos)
 
   if dist <= self.innerBull then return self.score.innerBull end
   if dist <= self.outerBull then return self.score.outerBull end
+
   local multiplier
   if dist <= self.tripleRingInnerRadius then     -- inner single
     multiplier = 1
@@ -197,10 +198,10 @@ function Board:calculateScore(pos)
   elseif dist <= self.radius then                -- double
     multiplier = 2
   else
-    return 0 -- missed the board
+    return 0
   end
 
-  local angle = math.atan2(dx, -dy) -- dx, -dy rotates the system
+  local angle = math.atan2(dx, -dy)
   if angle < 0 then angle = angle + 2 * math.pi end
 
   local sectorIndex = math.floor(angle / (2 * math.pi / 20)) + 1

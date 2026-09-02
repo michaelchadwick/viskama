@@ -22,6 +22,7 @@ local function scoreStringFor(pos, board)
   end
 
   local angle = math.atan2(dx, -dy)
+
   if angle < 0 then angle = angle + 2 * math.pi end
   local sectorIndex = math.floor(angle / (2 * math.pi / 20)) + 1
   local sectorValue = config.board.numbers[sectorIndex] or 0
@@ -136,7 +137,7 @@ function Game:throwDart(vec)
   local targetPos
   local angle
 
-  local floorThreshold = 0.1
+  local floorThreshold = 0.01
   if forceRatio < floorThreshold then
     targetPos = { x = startPos.x, y = love.graphics.getHeight() + 50 }
     angle = math.rad(90)
