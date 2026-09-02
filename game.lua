@@ -251,7 +251,10 @@ function Game:draw()
     local dx           = self.currentThrow.lastPos.x - self.currentThrow.startPos.x
     local dy           = self.currentThrow.lastPos.y - self.currentThrow.startPos.y
     local forceMag     = math.sqrt(dx * dx + dy * dy)
-    local forcePercent = math.min(forceMag / self.board.maxForceMagnitude, 1)
+    local forcePercent = math.min(
+      math.log(forceMag + 1) / math.log(self.board.maxForceMagnitude + 1),
+      1
+    )
 
     local meterW       = 300
     local meterH       = 20
