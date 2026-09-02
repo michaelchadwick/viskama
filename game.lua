@@ -63,6 +63,8 @@ function Game.new(board, config)
     lastPos  = { x = 0, y = 0 }
   }
 
+  self.pullOrigin        = nil
+
   self.gameOverDelay     = 0.35 -- seconds to wait after the last dart lands
   self.gameOverTimer     = 0    -- accumulates time
   self.waitingForOverlay = false
@@ -100,6 +102,7 @@ function Game:mousepressed(x, y, button)
   self.currentThrow.startPos.y = y
   self.currentThrow.lastPos.x  = x
   self.currentThrow.lastPos.y  = y
+  self.pullOrigin              = { x = x, y = y }
 end
 
 function Game:mousemoved(x, y, dx, dy)
@@ -117,6 +120,7 @@ function Game:mousereleased(x, y, button)
   }
   self:throwDart(vec)
   self.currentThrow.holding = false
+  self.pullOrigin = nil
 end
 
 ----------------------------------------------------------------
@@ -266,6 +270,21 @@ function Game:draw()
     local txt = string.format("Force: %.0f%%", forcePercent * 100)
     local txtW = self.font:getWidth(txt)
     love.graphics.print(txt, meterX + (meterW - txtW) / 2, meterY - 20)
+  end
+
+  if self.pullOrigin then
+    local origin = self.pullOrigin
+    local current = self.currentThrow.lastPos
+
+    -- small circle at the origin
+    love.graphics.setColor(0, 0, 1) -- blue
+    love.graphics.circle("fill", origin.x, origin.y, 5)
+
+    -- line to the current cursor position
+    love.graphics.setColor(0, 1, 0) -- green
+    love.graphics.setLineWidth(2)
+    love.graphics.line(origin.x, origin.y,
+      current.x, current.y)
   end
 
   -- HUD: throw, overall score --- individual dart scores
