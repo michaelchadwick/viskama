@@ -236,12 +236,12 @@ function Game:draw()
 
   -- Pointer Dot
   if self.currentThrow.holding then
-    love.graphics.setColor(0, 1, 0)
+    love.graphics.setColor(unpack(config.dart.colors.holdDot))
     love.graphics.circle("fill", self.currentThrow.lastPos.x,
       self.currentThrow.lastPos.y, 4)
   else
     local mx, my = love.mouse.getPosition()
-    love.graphics.setColor(0, 0, 1) -- blue
+    love.graphics.setColor(unpack(config.dart.colors.unholdDot))
     love.graphics.circle("fill", mx, my, 4)
   end
 
@@ -258,15 +258,15 @@ function Game:draw()
     local meterY       = love.graphics.getHeight() - 50
 
     -- background
-    love.graphics.setColor(0.3, 0.3, 0.3, 0.8)
+    love.graphics.setColor(unpack(self.uiColors.forceBox))
     love.graphics.rectangle("fill", meterX, meterY, meterW, meterH)
 
     -- fill
-    love.graphics.setColor(0, 1, 0, 0.8)
+    love.graphics.setColor(unpack(self.uiColors.forceMeter))
     love.graphics.rectangle("fill", meterX, meterY, meterW * forcePercent, meterH)
 
     -- text
-    love.graphics.setColor(1, 1, 1)
+    love.graphics.setColor(unpack(self.uiColors.text))
     local txt = string.format("Force: %.0f%%", forcePercent * 100)
     local txtW = self.font:getWidth(txt)
     love.graphics.print(txt, meterX + (meterW - txtW) / 2, meterY - 20)
@@ -277,11 +277,11 @@ function Game:draw()
     local current = self.currentThrow.lastPos
 
     -- small circle at the origin
-    love.graphics.setColor(0, 0, 1) -- blue
+    love.graphics.setColor(unpack(config.dart.colors.unholdDot))
     love.graphics.circle("fill", origin.x, origin.y, 5)
 
     -- line to the current cursor position
-    love.graphics.setColor(0, 1, 0) -- green
+    love.graphics.setColor(unpack(config.dart.colors.dragLine))
     love.graphics.setLineWidth(2)
     love.graphics.line(origin.x, origin.y,
       current.x, current.y)
@@ -300,7 +300,7 @@ function Game:draw()
   for i, dart in ipairs(self.darts) do
     local txt = dart.displayScore or ""
     local w = self.font:getWidth(txt)
-    love.graphics.setColor(1, 1, 1)
+    love.graphics.setColor(self.uiColors.text)
     love.graphics.setFont(self.font)
     love.graphics.print(txt, x - w, y + (i - 1) * lineHeight)
   end

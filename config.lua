@@ -3,6 +3,7 @@
 
 return {
   env = 'development',
+
   game = {
     text         = {
       lose  = "You lose :(",
@@ -14,6 +15,7 @@ return {
     windowWidth  = 800,
     windowHeight = 600,
   },
+
   board = {
     radius            = 200,
     innerBull         = 10,
@@ -53,7 +55,13 @@ return {
     crossSize         = 12,
     crossColor        = { 0.9, 0, 0 },
     crossOutlineColor = { 0.9, 0.9, 0.9 },
-    crossLineWidth    = 3
+    crossLineWidth    = 3,
+    colors            = {
+      unholdDot = { 0, 0, 1 },
+      holdDot   = { 0, 1, 0 },
+      dragLine  = { 0, 0.5, 0 },
+      shaft     = { 0.6, 0.6, 0.6 }
+    }
   },
 
   ui = {
@@ -61,9 +69,12 @@ return {
     smallFontSize = 24,
     colors        = {
       background = { 0.05, 0.05, 0.05 },
+      text       = { 1, 1, 1 },
       title      = { 1, 1, 1 },
       hud        = { 1, 1, 1 },
-      overlay    = { 0, 0, 0, 0.7 }
+      overlay    = { 0, 0, 0, 0.7 },
+      forceBox   = { 0.3, 0.3, 0.3, 0.8 },
+      forceMeter = { 0, 1, 0, 0.8 }
     }
   }
 }

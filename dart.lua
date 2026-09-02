@@ -15,6 +15,7 @@ function Dart.new(startPos, targetPos, score, angle, config)
   self.score             = score
   self.angle             = angle
   self.displayScore      = ""
+  self.colors            = config.colors
 
   self.elapsed           = 0
   self.duration          = config.duration
@@ -76,7 +77,7 @@ function Dart:draw()
     love.graphics.scale(self.scale, self.scale)
 
     -- shaft
-    love.graphics.setColor(0.6, 0.6, 0.6)
+    love.graphics.setColor(self.colors.shaft)
     love.graphics.rectangle("fill", -shaftW / 2, -shaftH / 2, shaftW, shaftH)
 
     -- tip
