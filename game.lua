@@ -15,6 +15,7 @@ local function scoreStringFor(pos, board)
   local dy = pos.y - board.y
   local dist = math.sqrt(dx * dx + dy * dy)
 
+  -- bullseyes
   if dist <= board.innerBull then
     return "IB50"
   elseif dist <= board.outerBull then
@@ -53,7 +54,8 @@ function Game.new(board, config)
   self.uiColors          = config.ui.colors
   self.font              = love.graphics.newFont(config.ui.smallFontSize)
 
-  self.throwsLeft        = 3
+  self.maxThrows         = config.game.maxThrows
+  self.throwsLeft        = config.game.maxThrows
   self.scores            = {}
   self.totalScore        = 0
   self.darts             = {}
@@ -78,7 +80,8 @@ end
 ----------------------------------------------------------------
 function Game:reset()
   self.state                   = "play"
-  self.throwsLeft              = 3
+  self.maxThrows               = self.maxThrows
+  self.throwsLeft              = self.maxThrows
   self.scores                  = {}
   self.totalScore              = 0
   self.darts                   = {}
@@ -293,10 +296,10 @@ function Game:draw()
   end
 
   -- HUD: throw, overall score --- individual dart scores
-  local currentThrowNumber = math.min(3, 4 - self.throwsLeft)
+  local currentThrowNumber = math.min(self.maxThrows, (self.maxThrows + 1) - self.throwsLeft)
   love.graphics.setFont(self.font)
   love.graphics.setColor(unpack(self.uiColors.hud))
-  love.graphics.print("Throw " .. currentThrowNumber .. " of 3", 10, 10)
+  love.graphics.print("Throw " .. currentThrowNumber .. " / " .. self.maxThrows, 10, 10)
   love.graphics.print("Total Score: " .. self.totalScore, 10, 40)
 
   local x = love.graphics.getWidth() - 10

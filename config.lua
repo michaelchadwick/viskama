@@ -5,6 +5,7 @@ return {
   env = 'development',
 
   game = {
+    maxThrows    = 10,
     text         = {
       lose  = "You lose :(",
       retry = "Click, touch, or press any key to try again",
