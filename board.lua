@@ -178,6 +178,21 @@ function Board:draw()
 end
 
 ----------------------------------------------------------------
+--  Board:sectorForPosition – return the sector number (20,1,18,…)
+----------------------------------------------------------------
+function Board:sectorForPosition(pos)
+  local dx = pos.x - self.x
+  local dy = pos.y - self.y
+
+  -- correct angle: 0° points up, increase clockwise
+  local angle = math.atan2(dy, dx) -- y first, then x
+  if angle < 0 then angle = angle + 2 * math.pi end
+
+  local sectorIdx = math.floor(angle / (2 * math.pi / 20)) + 1
+  return sectorIdx
+end
+
+----------------------------------------------------------------
 --  scoring
 ----------------------------------------------------------------
 function Board:calculateScore(pos)
@@ -185,9 +200,11 @@ function Board:calculateScore(pos)
   local dy = pos.y - self.y
   local dist = math.sqrt(dx * dx + dy * dy)
 
+  -- bullseyes
   if dist <= self.innerBull then return self.score.innerBull end
   if dist <= self.outerBull then return self.score.outerBull end
 
+  -- determine ring multipler
   local multiplier
   if dist <= self.tripleRingInnerRadius then     -- inner single
     multiplier = 1
