@@ -18,6 +18,7 @@ return {
   },
 
   board = {
+    numberFontSize    = 16,
     radius            = 200,
     innerBull         = 10,
     outerBull         = 20,

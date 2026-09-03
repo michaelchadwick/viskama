@@ -51,7 +51,7 @@ function Board.new(configBoard)
 
   self.colors                = configBoard.colors
   self.numbers               = configBoard.numbers
-  self.numberFont            = love.graphics.newFont(14)
+  self.numberFont            = love.graphics.newFont(configBoard.numberFontSize)
 
   return self
 end
