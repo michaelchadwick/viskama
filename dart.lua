@@ -15,6 +15,7 @@ function Dart.new(startPos, targetPos, score, angle, config)
   self.score          = score
   self.angle          = angle
   self.displayScore   = ""
+  self.displayPos     = ""
   self.colors         = config.colors
 
   self.elapsed        = 0

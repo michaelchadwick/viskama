@@ -28,6 +28,12 @@ return {
     maxForceMagnitude = 400, -- used to normalise drag length
     numbers           = { 20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5 },
 
+    center            = {
+      x = 400,
+      y = 300,
+      radius = 200
+    },
+
     colors            = {
       background  = { 0.05, 0.05, 0.15 },
       boardBg     = { 0.8, 0.8, 0.8 },
@@ -69,12 +75,13 @@ return {
 
   ui = {
     titleFontSize = 48,
-    smallFontSize = 24,
+    smallFontSize = 20,
     debugFontSize = 14,
     colors        = {
       background = { 0.05, 0.05, 0.05 },
       text       = { 1, 1, 1 },
       title      = { 1, 1, 1 },
+      highlight  = { 1, 0.9, 0 },
       hud        = { 1, 1, 1 },
       overlay    = { 0, 0, 0, 0.7 },
       forceBox   = { 0.3, 0.3, 0.3, 0.8 },

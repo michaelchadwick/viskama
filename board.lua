@@ -49,6 +49,7 @@ function Board.new(configBoard)
   self.tripleRingInnerRadius = self.outerBull + self.radius * 0.40
   self.tripleRingOuterRadius = self.tripleRingInnerRadius + self.tripleRingWidth
 
+  self.center                = configBoard.center
   self.colors                = configBoard.colors
   self.numbers               = configBoard.numbers
   self.numberFont            = love.graphics.newFont(configBoard.numberFontSize)
@@ -183,6 +184,8 @@ end
 function Board:sectorForPosition(pos)
   local dx = pos.x - self.x
   local dy = pos.y - self.y
+  -- local dx = pos.x - self.center.x
+  -- local dy = pos.y - self.center.y
 
   -- correct angle: 0° points up, increase clockwise
   local angle = math.atan2(dy, dx) -- y first, then x

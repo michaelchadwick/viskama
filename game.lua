@@ -13,6 +13,8 @@ Game.__index = Game
 local function scoreStringFor(pos, board)
   local dx = pos.x - board.x
   local dy = pos.y - board.y
+  -- local dx = pos.x - board.center.x
+  -- local dy = pos.y - board.center.y
   local dist = math.sqrt(dx * dx + dy * dy)
 
   -- bullseyes
@@ -305,15 +307,19 @@ function Game:draw()
   love.graphics.print("Total Score: " .. self.totalScore, 10, 40)
 
   -- individual dart scores
-  local x = love.graphics.getWidth() - 10
+  local x = love.graphics.getWidth() + 20
   local y = 10
-  local lineHeight = 20
+  local lineHeight = 14
   for i, dart in ipairs(self.darts) do
-    local txt = dart.displayScore or ""
-    local w = self.textFont:getWidth(txt)
+    local score = dart.displayScore or ""
+    local pos = (string.format("%d", dart.targetPos.x) .. ", " .. string.format("%d", dart.targetPos.y)) or ""
+    local w = self.textFont:getWidth(score)
     love.graphics.setColor(self.uiColors.text)
-    love.graphics.setFont(self.textFont)
-    love.graphics.print(txt, x - w, y + (i - 1) * lineHeight)
+    love.graphics.setFont(self.debugFont)
+    love.graphics.print(i, x - 145, y + (i - 1) * lineHeight)
+    love.graphics.print(score, x - 120, y + (i - 1) * lineHeight)
+    love.graphics.setColor(self.uiColors.highlight)
+    love.graphics.print(pos, x - 90, y + (i - 1) * lineHeight)
   end
 
   -- cursor position
