@@ -52,7 +52,8 @@ function Game.new(board, config)
   self.state             = "title"
 
   self.uiColors          = config.ui.colors
-  self.font              = love.graphics.newFont(config.ui.smallFontSize)
+  self.textFont          = love.graphics.newFont(config.ui.smallFontSize)
+  self.debugFont         = love.graphics.newFont(config.ui.debugFontSize)
 
   self.maxThrows         = config.game.maxThrows
   self.throwsLeft        = config.game.maxThrows
@@ -276,7 +277,7 @@ function Game:draw()
     -- text
     love.graphics.setColor(unpack(self.uiColors.text))
     local txt = string.format("Force: %.0f%%", forcePercent * 100)
-    local txtW = self.font:getWidth(txt)
+    local txtW = self.textFont:getWidth(txt)
     love.graphics.print(txt, meterX + (meterW - txtW) / 2, meterY - 20)
   end
 
@@ -295,23 +296,34 @@ function Game:draw()
       current.x, current.y)
   end
 
-  -- HUD: throw, overall score --- individual dart scores
+  -- HUD:
+  --- current throw and totalScore
   local currentThrowNumber = math.min(self.maxThrows, (self.maxThrows + 1) - self.throwsLeft)
-  love.graphics.setFont(self.font)
+  love.graphics.setFont(self.textFont)
   love.graphics.setColor(unpack(self.uiColors.hud))
   love.graphics.print("Throw " .. currentThrowNumber .. " / " .. self.maxThrows, 10, 10)
   love.graphics.print("Total Score: " .. self.totalScore, 10, 40)
 
+  -- individual dart scores
   local x = love.graphics.getWidth() - 10
   local y = 10
   local lineHeight = 20
   for i, dart in ipairs(self.darts) do
     local txt = dart.displayScore or ""
-    local w = self.font:getWidth(txt)
+    local w = self.textFont:getWidth(txt)
     love.graphics.setColor(self.uiColors.text)
-    love.graphics.setFont(self.font)
+    love.graphics.setFont(self.textFont)
     love.graphics.print(txt, x - w, y + (i - 1) * lineHeight)
   end
+
+  -- cursor position
+  x = love.graphics.getWidth() - 50
+  y = love.graphics.getHeight() - 32
+  love.graphics.setFont(self.debugFont)
+  local mx, my = love.mouse.getPosition()
+  love.graphics.print('X: ' .. mx, x, y)
+  y = love.graphics.getHeight() - 20
+  love.graphics.print('Y: ' .. my, x, y)
 end
 
 return Game
