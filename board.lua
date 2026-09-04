@@ -24,8 +24,8 @@ end
 function Board.new(configBoard)
   local self                 = setmetatable({}, Board)
 
-  self.x                     = 400
-  self.y                     = 300
+  self.centerX               = configBoard.center.x
+  self.centerY               = configBoard.center.y
   self.radius                = configBoard.radius
 
   self.innerBull             = configBoard.innerBull
@@ -49,7 +49,6 @@ function Board.new(configBoard)
   self.tripleRingInnerRadius = self.outerBull + self.radius * 0.40
   self.tripleRingOuterRadius = self.tripleRingInnerRadius + self.tripleRingWidth
 
-  self.center                = configBoard.center
   self.colors                = configBoard.colors
   self.numbers               = configBoard.numbers
   self.numberFont            = love.graphics.newFont(configBoard.numberFontSize)
@@ -62,7 +61,7 @@ end
 ----------------------------------------------------------------
 function Board:draw()
   love.graphics.push()
-  love.graphics.translate(self.x, self.y)
+  love.graphics.translate(self.centerX, self.centerY)
 
   local segmentCount     = 20
   local segmentAngle     = math.rad(18)  -- 360° / 20
@@ -178,56 +177,47 @@ function Board:draw()
   love.graphics.pop()
 end
 
-----------------------------------------------------------------
---  Board:sectorForPosition – return the sector number (20,1,18,…)
-----------------------------------------------------------------
-function Board:sectorForPosition(pos)
-  local dx = pos.x - self.x
-  local dy = pos.y - self.y
-  -- local dx = pos.x - self.center.x
-  -- local dy = pos.y - self.center.y
+-- Returns two values:
+--   score  – numeric score (0 if missed)
+--   text   – printable label, e.g. "T20", "IB50", "M0"
+function Board:scoreFromPosition(pos)
+  local cx, cy = self.centerX, self.centerY
+  local dx, dy = pos.x - cx, pos.y - cy
+  local r = math.sqrt(dx * dx + dy * dy)
 
-  -- correct angle: 0° points up, increase clockwise
-  local angle = math.atan2(dy, dx) -- y first, then x
-  if angle < 0 then angle = angle + 2 * math.pi end
-
-  local sectorIdx = math.floor(angle / (2 * math.pi / 20)) + 1
-  return sectorIdx
-end
-
-----------------------------------------------------------------
---  scoring
-----------------------------------------------------------------
-function Board:calculateScore(pos)
-  local dx = pos.x - self.x
-  local dy = pos.y - self.y
-  local dist = math.sqrt(dx * dx + dy * dy)
-
-  -- bullseyes
-  if dist <= self.innerBull then return self.score.innerBull end
-  if dist <= self.outerBull then return self.score.outerBull end
-
-  -- determine ring multipler
-  local multiplier
-  if dist <= self.tripleRingInnerRadius then     -- inner single
-    multiplier = 1
-  elseif dist <= self.tripleRingOuterRadius then -- triple
-    multiplier = 3
-  elseif dist <= self.doubleRingInnerRadius then -- outer single
-    multiplier = 1
-  elseif dist <= self.radius then                -- double
-    multiplier = 2
-  else
-    return 0
+  if r > self.radius then
+    return 0, "M0"
   end
 
-  local angle = math.atan2(dx, -dy)
-  if angle < 0 then angle = angle + 2 * math.pi end
+  if r <= self.innerBull then
+    return self.score.innerBull, "IB50"
+  elseif r <= self.outerBull then
+    return self.score.outerBull, "OB25"
+  end
 
-  local sectorIndex = math.floor(angle / (2 * math.pi / 20)) + 1
-  local sectorValue = self.numbers[sectorIndex] or 0
+  local multiplier
+  if r <= self.ring then
+    multiplier = 1
+  elseif r <= self.tripleRingInnerRadius then
+    multiplier = 3
+  elseif r <= self.doubleRingInnerRadius then
+    multiplier = 1
+  else
+    multiplier = 2
+  end
 
-  return sectorValue * multiplier
+  local deg       = math.deg(math.atan2(dy, dx)) -- 0° at +x, CCW
+  deg             = (deg + 99) % 360             -- rotate to top
+
+  local sectorIdx = math.floor(deg / 18) + 1
+  local sectorVal = self.numbers[sectorIdx]
+
+  local score     = sectorVal * multiplier
+  local prefix    = (multiplier == 3 and "T") or
+      (multiplier == 2 and "D") or
+      (multiplier == 1 and "S")
+
+  return score, prefix .. sectorVal
 end
 
 return Board

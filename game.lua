@@ -7,43 +7,6 @@ local Game   = {}
 Game.__index = Game
 
 ----------------------------------------------------------------
---  Local helper – turns a landing position into a string like
---  “D20”, “T18”, “IB50”, “OB25” or “M0”.
-----------------------------------------------------------------
-local function scoreStringFor(pos, board)
-  local dx = pos.x - board.x
-  local dy = pos.y - board.y
-  -- local dx = pos.x - board.center.x
-  -- local dy = pos.y - board.center.y
-  local dist = math.sqrt(dx * dx + dy * dy)
-
-  -- bullseyes
-  if dist <= board.innerBull then
-    return "IB50"
-  elseif dist <= board.outerBull then
-    return "OB25"
-  end
-
-  local angle = math.atan2(dx, -dy)
-
-  if angle < 0 then angle = angle + 2 * math.pi end
-  local sectorIndex = math.floor(angle / (2 * math.pi / 20)) + 1
-  local sectorValue = config.board.numbers[sectorIndex] or 0
-
-  if dist <= board.tripleRingInnerRadius then
-    return tostring(sectorValue)
-  elseif dist <= board.tripleRingOuterRadius then
-    return "T" .. sectorValue
-  elseif dist <= board.doubleRingInnerRadius then
-    return tostring(sectorValue)
-  elseif dist <= board.radius then
-    return "D" .. sectorValue
-  else
-    return "M0"
-  end
-end
-
-----------------------------------------------------------------
 --  ctor – receives the board and the full configuration
 ----------------------------------------------------------------
 function Game.new(board, config)
@@ -168,8 +131,8 @@ function Game:throwDart(vec)
       errorScale = (forceRatio - optimumForce) / (1 - optimumForce)
     end
     local baseError = self.board.maxError
-    local offsetX = (math.random() * 2 - 1) * errorScale * baseError
-    local offsetY = (math.random() * 2 - 1) * errorScale * baseError
+    local offsetX = (math.random() * 2 - 1) -- * errorScale * baseError
+    local offsetY = (math.random() * 2 - 1) -- * errorScale * baseError
 
     targetPos = {
       x = startPos.x - dir.x * travelDistance + offsetX,
@@ -179,8 +142,8 @@ function Game:throwDart(vec)
     angle = math.atan2(-dir.y, -dir.x)
   end
 
-  local score = self.board:calculateScore(targetPos)
-  local dart  = Dart.new(startPos, targetPos, score, angle,
+  local score, txt = self.board:scoreFromPosition(targetPos, self.board)
+  local dart       = Dart.new(startPos, targetPos, score, angle,
     self.config.dart, self.board)
 
   table.insert(self.darts, dart)
@@ -201,7 +164,10 @@ function Game:update(dt)
       dart.scoreAdded = true
 
       -- Build the human‑readable score string
-      dart.displayScore = scoreStringFor(dart.targetPos, self.board)
+      local score, txt = self.board:scoreFromPosition(dart.targetPos)
+      dart.displayScore = txt
+      dart.displayPos = (string.format("%d", dart.targetPos.x) .. ", " .. string.format("%d", dart.targetPos.y))
+      dart.displayAngle = string.format("%5.1f", dart.angle)
     end
   end
 
@@ -309,21 +275,24 @@ function Game:draw()
   -- individual dart scores
   local x = love.graphics.getWidth() + 20
   local y = 10
+  local xOffset = 170
   local lineHeight = 14
   for i, dart in ipairs(self.darts) do
     local score = dart.displayScore or ""
-    local pos = (string.format("%d", dart.targetPos.x) .. ", " .. string.format("%d", dart.targetPos.y)) or ""
-    local w = self.textFont:getWidth(score)
+    local pos = dart.displayPos or ""
+    local angle = dart.displayAngle or ""
+
     love.graphics.setColor(self.uiColors.text)
     love.graphics.setFont(self.debugFont)
-    love.graphics.print(i, x - 145, y + (i - 1) * lineHeight)
-    love.graphics.print(score, x - 120, y + (i - 1) * lineHeight)
+    love.graphics.print(i, x - xOffset, y + (i - 1) * lineHeight)
+    love.graphics.print(score, x - (xOffset - 20), y + (i - 1) * lineHeight)
     love.graphics.setColor(self.uiColors.highlight)
-    love.graphics.print(pos, x - 90, y + (i - 1) * lineHeight)
+    love.graphics.print(pos, x - (xOffset - 55), y + (i - 1) * lineHeight)
+    love.graphics.print(angle, x - (xOffset - 115), y + (i - 1) * lineHeight)
   end
 
   -- cursor position
-  x = love.graphics.getWidth() - 50
+  x = love.graphics.getWidth() - 42
   y = love.graphics.getHeight() - 32
   love.graphics.setFont(self.debugFont)
   local mx, my = love.mouse.getPosition()

@@ -76,7 +76,7 @@ return {
   ui = {
     titleFontSize = 48,
     smallFontSize = 20,
-    debugFontSize = 14,
+    debugFontSize = 12,
     colors        = {
       background = { 0.05, 0.05, 0.05 },
       text       = { 1, 1, 1 },
