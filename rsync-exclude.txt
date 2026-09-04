@@ -1,0 +1,13 @@
+.DS_Store
+.editorconfig
+.git
+.github
+.gitignore
+.ruby-lsp
+
+_debug
+action.yml
+LICENSE.md
+README.md
+Rakefile
+rsync-exclude.txt
