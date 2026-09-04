@@ -60,7 +60,7 @@ return {
     scaleStart     = 0.2,
     scalePeak      = 1.0,
     scaleEnd       = 0.2,
-    crossSize      = 8,
+    crossSize      = 4,
     crossLineWidth = 2,
     colors         = {
       cross        = { 1, 1, 1 },
