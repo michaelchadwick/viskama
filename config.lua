@@ -34,6 +34,11 @@ return {
       radius = 200
     },
 
+    score             = {
+      innerBull = 50,
+      outerBull = 25
+    },
+
     colors            = {
       background  = { 0.05, 0.05, 0.15 },
       boardBg     = { 0.8, 0.8, 0.8 },
@@ -47,11 +52,6 @@ return {
       numbers     = { 0.8, 0.8, 0.8 },
       floor       = { 0.5, 0.5, 0.5 }
     },
-
-    score             = {
-      innerBull = 50,
-      outerBull = 25
-    },
   },
 
   dart = {
@@ -62,10 +62,11 @@ return {
     scaleEnd       = 0.2,
     crossSize      = 4,
     crossLineWidth = 2,
+
     colors         = {
       cross        = { 1, 1, 1 },
       crossOutline = { 0.1, 0.1, 0.1 },
-      unholdDot    = { 0, 0, 1 },
+      unholdDot    = { 0, 1, 1 },
       holdDot      = { 0, 1, 0 },
       dragLine     = { 0, 0.5, 0 },
       shaft        = { 0.6, 0.6, 0.6 },
@@ -77,6 +78,7 @@ return {
     titleFontSize = 48,
     smallFontSize = 20,
     debugFontSize = 12,
+
     colors        = {
       background = { 0.05, 0.05, 0.05 },
       text       = { 1, 1, 1 },
