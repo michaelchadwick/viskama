@@ -5,6 +5,7 @@
 .gitignore
 .ruby-lsp
 
+*.lua
 _debug
 action.yml
 LICENSE.md
